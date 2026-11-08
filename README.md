@@ -1,6 +1,6 @@
 # Shape Color Quest ⭐
 
-A friendly, big-tap learning game for **3–6 year olds**: shapes, colors, listening, memory and careful looking.
+A friendly, big-tap learning game for **3–6 year olds**: shapes, colors, counting, listening, memory and careful looking.
 
 **Play online:** https://khvr1993.github.io/shape-color-quest/
 
@@ -8,28 +8,40 @@ A friendly, big-tap learning game for **3–6 year olds**: shapes, colors, liste
 
 | Mode | What the child does |
 | --- | --- |
-| 🔺 **Shapes** | Hears “Find the triangle” and taps the matching shape. |
-| 🎨 **Colors** | Hears “Find something red” and taps something of that colour. |
-| ✨ **Shapes + Colors** | Hears “Find the red star” and must match both attributes. |
-| 🧠 **Memory** | Flips cards and matches pairs of identical shape-and-colour cards. |
-| ⚡ **Tricky** | Mixed challenges: a colour word printed in a *different* colour (Stroop-style), “find the picture that is NOT a shape”, and category hunts like “find the fruit”. |
+| 🔺 **Shapes** | Hears “Find the triangle” and taps the matching shape. Later: “Find 2 circles and 1 star”. |
+| 🎨 **Colors** | Hears “Find something red”, then “Find 2 red things and 1 blue thing”. |
+| ✨ **Shapes + Colors** | Hears “Find the red star” and must match both attributes. From level 5 the color **word** may be printed in a different color (Stroop-style). |
+| 🧠 **Memory** | Flips cards and matches pairs of identical shape-and-color cards (3 → 8 pairs). |
+| ⚡ **Tricky** | Mixed challenges: sneaky color words, “find the picture that is NOT a shape”, and category hunts like “find the fruit”. |
 
-## Adaptive difficulty
+## Eight levels
 
-Difficulty is based on **recent answers**, not the round number. Correct taps push it up, mistakes push it down:
+Difficulty adapts to **recent answers**, not the round number. About three correct answers move the child up a level; a couple of mistakes move them back.
 
-- **Number of choices** grows from 4 → 6 → 8 tiles (memory: 3 → 6 pairs).
-- **Distractor similarity** changes: at first everyone differs in both shape and colour, later tiles share the target's colour or shape, so the child has to look carefully.
-- The tricky colour-word effect switches on in Shapes + Colors once the child is doing well.
-- The small label under the board shows the current level (🐣 Gentle / 🌱 Growing / 🚀 Tricky).
+| Level | Board | Task |
+| --- | --- | --- |
+| 1–2 | 4–5 tiles | find one shape/color |
+| 3–4 | 6–7 tiles | distractors share the target's color or shape |
+| 5 | 8 tiles | hardest single-answer traps + tricky color words |
+| 6 | 8 tiles | **counting**: find 2 of something |
+| 7 | 10 tiles | **two groups**: find 2 of X and 1 of Y |
+| 8 | 12 tiles | big jumbled board, two groups, strongest distractors |
+
+Levels 6–8 add a **collection tray** under the prompt: each target has slots, and tapping a matching shape drops a star into the next slot. Tapped shapes stay on the board marked with a green ring. The task completes only when every slot is filled — so the child has to keep count.
+
+Boards are laid out on a grid but every tile gets a small random rotation and offset, so the higher levels look like a jumbled pile of shapes rather than a neat table.
+
+## Why tap-to-collect instead of drag-and-drop
+
+Dragging is fiddly for a 5-year-old's finger and easy to cancel by accident. Tapping a shape and watching it fill a slot in the tray gives the same "put it in the basket" goal, with bigger, more reliable touch targets — and the tray is a visual, pre-reading way to show how many are still needed.
 
 ## Polish
 
-- **Start screen** with a mode picker.
-- **Pause** button (also `Esc`) with resume, restart-round and home.
-- **Round summary** after every 8 questions (one memory board) showing stars, first-try accuracy and best streak.
+- **Start screen** with a mode picker and 8-level note.
+- **Pause** (⏸️ or `Esc`) with resume, restart-round and home.
+- **Round summary** after every 8 questions (one memory board): stars, first-try accuracy, best streak and current level.
 - Praise, confetti, stars, streak bonus and a sticker every 5 stars. Wrong taps never punish — they wiggle, the prompt is repeated, and the board stays open.
-- Sound and voice toggles; voice uses the device's text-to-speech.
+- Level-up toast, sound and voice toggles. Voice uses the device's text-to-speech.
 
 ## Run it
 
@@ -37,4 +49,4 @@ Open `index.html` in any browser — no build step, no dependencies, works offli
 
 ## Tech
 
-Single self-contained `index.html`: HTML, CSS, vanilla JS, inline SVG shapes, Web Audio sound effects and SpeechSynthesis for the spoken prompts.
+Single self-contained `index.html`: HTML, CSS, vanilla JS, inline SVG shapes, Web Audio sound effects and SpeechSynthesis for the spoken prompts. Boards are generated with an exact-count guarantee (no ambiguous answers).

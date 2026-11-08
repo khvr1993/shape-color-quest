@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Shape Color Quest ⭐</title>
-<meta name="description" content="A friendly learning game for ages 3-6. Find shapes and colors by listening, match pairs, and beat the tricky word!"/>
+<meta name="description" content="A friendly learning game for ages 3-6. Find shapes and colors, count them, match pairs and beat the tricky word!"/>
 <meta name="theme-color" content="#FFF7D6">
 <style>
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -67,15 +67,31 @@
   .speak:active{transform:translateY(3px);box-shadow:0 2px 0 #D94F7A}
   .feedback{min-height:26px;font-size:19px;font-weight:900;color:var(--accent2);text-align:center}
 
-  .grid{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:10px;max-width:520px;margin:0 auto;width:100%}
+  /* collection tray for counting tasks */
+  .basket{background:var(--card);border-radius:22px;padding:8px 10px;display:flex;flex-wrap:wrap;
+    justify-content:center;gap:10px;box-shadow:var(--shadow)}
+  .slot-group{display:flex;align-items:center;gap:7px;background:#F7F4FF;border-radius:999px;
+    padding:6px 12px;transition:background .2s}
+  .slot-group.done{background:#E8FFF1}
+  .slot-preview{width:30px;height:30px;display:grid;place-items:center}
+  .slot-preview svg{width:100%;height:100%}
+  .slot{width:23px;height:23px;border-radius:50%;border:2px dashed #C9BFF5;display:grid;place-items:center;font-size:11px}
+  .slot.on{border:0;background:var(--sun)}
+
+  .grid{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:10px;max-width:520px;margin:0 auto;
+    width:100%;padding:4px;overflow:visible}
   .tile{aspect-ratio:1;background:var(--card);border-radius:22px;display:grid;place-items:center;
-    box-shadow:var(--shadow);transition:transform .12s,background .2s;position:relative;overflow:hidden;padding:6px}
-  .tile:active{transform:scale(.96)}
+    box-shadow:var(--shadow);transition:transform .12s,background .2s;position:relative;overflow:hidden;padding:6px;
+    --jrot:0deg;--jx:0px;--jy:0px;transform:rotate(var(--jrot)) translate(var(--jx),var(--jy))}
+  .tile:active{transform:rotate(var(--jrot)) translate(var(--jx),var(--jy)) scale(.96)}
   .tile svg{width:74%;height:74%;filter:drop-shadow(0 3px 0 rgba(0,0,0,.07))}
   .tile .emoji{font-size:clamp(28px,8.5vw,50px);line-height:1}
-  .tile.correct{background:#D9FFE8;box-shadow:0 6px 0 var(--green)}
+  .tile.picked{background:#E9FFF2;box-shadow:inset 0 0 0 4px var(--green)}
+  .tile.picked svg{opacity:.5}
   .tile.wrong{animation:wiggle .4s}
-  @keyframes wiggle{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+  @keyframes wiggle{0%,100%{transform:rotate(var(--jrot)) translate(var(--jx),var(--jy))}
+    25%{transform:rotate(var(--jrot)) translate(calc(var(--jx) - 7px),var(--jy))}
+    75%{transform:rotate(var(--jrot)) translate(calc(var(--jx) + 7px),var(--jy))}}
   .pop{position:absolute;font-size:26px;animation:pop .7s forwards;pointer-events:none}
   @keyframes pop{to{transform:translateY(-46px) scale(1.4);opacity:0}}
 
@@ -92,6 +108,14 @@
   .reward{text-align:center;font-size:18px;font-weight:900;min-height:24px;color:var(--accent2)}
   .difficulty{text-align:center;color:var(--muted);font-size:12.5px;font-weight:800}
   .footer{text-align:center;color:var(--muted);font-size:12px;font-weight:700}
+
+  /* compact mode: big boards need the room */
+  .app.compact .prompt-card{padding:10px 12px}
+  .app.compact .prompt{font-size:clamp(20px,5.4vw,28px);margin:4px 0 8px}
+  .app.compact .speak{padding:9px 16px;font-size:15px}
+  .app.compact .feedback{min-height:20px;font-size:16px}
+  .app.compact .grid{gap:8px}
+  .app.compact .footer{display:none}
 
   /* ---------- overlays ---------- */
   .overlay{position:fixed;inset:0;background:rgba(45,42,74,.55);display:grid;place-items:center;padding:20px;z-index:60}
@@ -123,7 +147,7 @@
 </style>
 </head>
 <body>
-<div class="app">
+<div class="app" id="app">
 
   <!-- ================= START ================= -->
   <section id="startScreen" class="screen">
@@ -135,15 +159,15 @@
     <div class="mode-grid">
       <button class="mode-card" data-mode="shape">
         <span class="mode-emoji">🔺</span><span class="mode-name">Shapes</span>
-        <span class="mode-desc">Find the shape you hear</span>
+        <span class="mode-desc">Find the shapes you hear</span>
       </button>
       <button class="mode-card" data-mode="color">
         <span class="mode-emoji">🎨</span><span class="mode-name">Colors</span>
-        <span class="mode-desc">Find something that color</span>
+        <span class="mode-desc">Find a color or count them</span>
       </button>
       <button class="mode-card" data-mode="both">
         <span class="mode-emoji">✨</span><span class="mode-name">Shapes + Colors</span>
-        <span class="mode-desc">Find both together</span>
+        <span class="mode-desc">Match both together</span>
       </button>
       <button class="mode-card" data-mode="memory">
         <span class="mode-emoji">🧠</span><span class="mode-name">Memory</span>
@@ -161,7 +185,7 @@
       <button class="icon-btn" id="soundBtn" aria-label="Toggle sound">🔊</button>
       <button class="icon-btn" id="voiceBtn" aria-label="Toggle voice">🗣️</button>
     </div>
-    <p class="tiny">Tap “Hear it!” at any time to listen again.</p>
+    <p class="tiny">8 levels • counting games start at level 6</p>
   </section>
 
   <!-- ================= GAME ================= -->
@@ -182,6 +206,7 @@
       <button class="speak" id="speakBtn">🔊 Hear it!</button>
     </div>
 
+    <div class="basket hidden" id="basket" aria-label="Shapes to collect"></div>
     <div class="feedback" id="feedback" aria-live="polite"></div>
     <div class="grid" id="grid" aria-label="Choices"></div>
 
@@ -191,7 +216,7 @@
       <span id="goalText">0 / 8</span>
     </div>
     <div class="reward" id="reward"></div>
-    <div class="difficulty" id="diffLabel">🐣 Gentle • adapting to your answers</div>
+    <div class="difficulty" id="diffLabel">Level 1 of 8 • 🐣 Gentle</div>
     <div class="footer">For little learners ages 3–6</div>
   </section>
 </div>
@@ -235,7 +260,7 @@
 /* ============================================================
    Shape Color Quest — single-file kids learning game
    Modes: shapes, colors, shapes+colors, memory, tricky
-   Adaptive difficulty from recent answers (not round count)
+   8 levels; counting tasks (collect N into the tray) from level 6
    ============================================================ */
 
 const $ = id => document.getElementById(id);
@@ -264,13 +289,27 @@ const OBJECTS = [
 ];
 const CATEGORIES = ['fruit','animal','vehicle','plant'];
 const PRAISE = ['Great job!','Wow, super!','You did it!','Amazing!','Hooray!','Brilliant!','Well done!','Fantastic!'];
+const GOT = ['Got it!','Nice!','Yes!','Good one!','Keep going!'];
 const TRY = ['Try again!','Almost! Look carefully!','You can do it!','Try another one!'];
 const REWARDS = ['🦁','🐶','🦄','🐸','🦋','🐙','🦉','🐢','🦊','🐼'];
+
+/* Level ladder: difficulty is a float 1..8 mapped to these rows. */
+const QUIZ_LEVELS = [
+  /* 1 */ {tiles:4,  groups:1, count:1, sim:0.00, jitter:0.00, basket:false},
+  /* 2 */ {tiles:5,  groups:1, count:1, sim:0.20, jitter:0.10, basket:false},
+  /* 3 */ {tiles:6,  groups:1, count:1, sim:0.50, jitter:0.15, basket:false},
+  /* 4 */ {tiles:7,  groups:1, count:1, sim:0.80, jitter:0.25, basket:false},
+  /* 5 */ {tiles:8,  groups:1, count:1, sim:0.95, jitter:0.35, basket:false},
+  /* 6 */ {tiles:8,  groups:1, count:2, sim:0.50, jitter:0.45, basket:true},
+  /* 7 */ {tiles:10, groups:2, count:2, sim:0.65, jitter:0.65, basket:true},
+  /* 8 */ {tiles:12, groups:2, count:2, sim:0.85, jitter:0.95, basket:true}
+];
+const MEM_PAIRS = [3,3,4,4,5,6,7,8];
 
 const G = {
   screen:'start', mode:null, paused:false,
   stars:0, score:0, streak:0, bestStreak:0,
-  difficulty:0.1, history:[],
+  levelFloat:1, history:[],
   round:{num:1, answered:0, correct:0, stars:0},
   quiz:null, mem:null, locked:false, hadError:false, lastTricky:null,
   pendingNext:false, pendingSummary:false, scheduleId:0,
@@ -281,20 +320,24 @@ const G = {
 const pick = a => a[Math.floor(Math.random()*a.length)];
 const shuffle = a => [...a].sort(()=>Math.random()-.5);
 const clamp = (v,lo,hi) => Math.min(hi,Math.max(lo,v));
-const comboKey = (s,c) => s.id + '|' + c.id;
-const choicesFor = d => 4 + Math.round(d * 2) * 2;
+const getLevel = () => Math.max(1, Math.min(8, Math.floor(G.levelFloat)));
+const levelCfg = (lv = getLevel()) => QUIZ_LEVELS[lv-1];
 
 function columnsFor(n){
-  const narrow = window.innerWidth < 440;
   if(n <= 4) return 2;
-  if(n <= 6) return 3;
-  return narrow ? 3 : 4;
+  if(n <= 9) return 3;
+  return 4;
 }
 function memColumns(n){
   const narrow = window.innerWidth < 440;
   if(n <= 6) return 3;
   if(n <= 8) return 4;
-  return narrow ? 3 : 4;
+  if(n <= 12) return narrow ? 3 : 4;
+  return 4;
+}
+function joinParts(parts){
+  if(parts.length <= 1) return parts[0] || '';
+  return parts.slice(0,-1).join(', ') + ' and ' + parts[parts.length-1];
 }
 
 /* ---------------- shapes ---------------- */
@@ -333,6 +376,7 @@ const playHappy = () => [523,659,784,1047].forEach((f,i)=>beep(f, i*.09));
 const playOops  = () => { beep(300,0,.15,'triangle',.11); beep(250,.12,.18,'triangle',.11); };
 const playMatch = () => [659,880,1175].forEach((f,i)=>beep(f, i*.08,.12,'sine',.14));
 const playFlip  = () => beep(620+Math.random()*180, 0, .07, 'sine', .10);
+const playCollect = n => beep(700 + n*90, 0, .10, 'sine', .15);
 
 function speak(text){
   if(!G.voiceOn || !('speechSynthesis' in window)) return;
@@ -366,113 +410,195 @@ function confetti(count=14){
 }
 
 /* ============================================================
-   ADAPTIVE DIFFICULTY
-   difficulty 0..1 drives choice count and distractor similarity.
-   Correct answers push it up, mistakes push it down.
+   LEVELS — adaptive from recent answers
+   levelFloat 1..8; ~3 correct answers per level up,
+   a couple of mistakes drops a level.
    ============================================================ */
 function recordResult(ok){
   G.history.push(ok?1:0);
   if(G.history.length > 8) G.history.shift();
-  const d = G.difficulty;
-  G.difficulty = clamp(ok ? d + 0.10*(1-d) : d - 0.13, 0.05, 1);
-  updateDifficultyLabel();
+  const before = getLevel();
+  G.levelFloat = clamp(G.levelFloat + (ok ? 0.40 : -0.55), 1, 8);
+  const after = getLevel();
+  if(after > before) showLevelUp(after);
+  updateLevelLabel();
 }
-function updateDifficultyLabel(){
-  const d = G.difficulty;
-  const label = d < 0.34 ? '🐣 Gentle' : d < 0.67 ? '🌱 Growing' : '🚀 Tricky';
+function updateLevelLabel(){
+  const lv = getLevel();
+  const mood = lv <= 2 ? '🐣 Gentle' : lv <= 4 ? '🌱 Growing' : lv <= 6 ? '🚀 Tricky' : '🌟 Super tricky';
   const el = $('diffLabel');
-  if(el) el.textContent = label + ' • adapting to your answers';
+  if(el) el.textContent = `Level ${lv} of 8 • ${mood}`;
+  const app = $('app');
+  if(app) app.classList.toggle('compact', lv >= 6);
 }
 
 /* ============================================================
    QUESTION BUILDERS
-   Each returns { tiles, promptHTML, speech, label, tricky, stroop }
-   Exactly one tile is the correct answer in every mode.
+   Every question is a list of groups: {need, found, match, preview}
+   plus a board of tiles. Exactly `need` tiles match each group.
    ============================================================ */
 
 function makeShapeQuestion(){
-  const d = G.difficulty;
-  const n = Math.min(SHAPES.length, choicesFor(d));
-  const targetShape = pick(SHAPES);
-  const targetColor = pick(COLORS);
-  const others = shuffle(SHAPES.filter(s => s.id !== targetShape.id)).slice(0, n-1);
-  const sameChance = d < 0.34 ? 0 : d < 0.67 ? 0.5 : 0.92;
+  const cfg = levelCfg();
+  const groupShapes = shuffle(SHAPES).slice(0, cfg.groups);
+  const counts = cfg.groups === 1 ? [cfg.count] : [cfg.count, 1];
+  const groups = [], tiles = [], partsHTML = [], partsSpeech = [];
+  const usedShapeIds = new Set();
 
-  const tiles = [{kind:'shape', shape:targetShape, color:targetColor, correct:true}];
-  others.forEach(s => {
-    const color = Math.random() < sameChance
-      ? targetColor
-      : pick(COLORS.filter(c => c.id !== targetColor.id));
-    tiles.push({kind:'shape', shape:s, color});
+  groupShapes.forEach((shape, i) => {
+    const need = counts[i];
+    groups.push({
+      need, found: 0,
+      match: t => t.kind === 'shape' && t.shape.id === shape.id,
+      preview: `<span class="slot-preview">${shapeSVG(shape.id, {hex:'#5C577F'})}</span>`
+    });
+    for(let k=0;k<need;k++) tiles.push({kind:'shape', shape, color:pick(COLORS), selected:false});
+    usedShapeIds.add(shape.id);
+
+    if(need === 1){
+      partsHTML.push(`the <b>${shape.name}</b>`);
+      partsSpeech.push(`the ${shape.name}`);
+    } else {
+      partsHTML.push(`<b>${need} ${shape.name}s</b>`);
+      partsSpeech.push(`${need} ${shape.name}s`);
+    }
   });
+
+  const matchColors = tiles.map(t => t.color);
+  const pool = SHAPES.filter(s => !usedShapeIds.has(s.id));
+  let guard = 0;
+  while(tiles.length < cfg.tiles && guard++ < 400){
+    const shape = pick(pool);
+    const color = Math.random() < cfg.sim ? pick(matchColors) : pick(COLORS);
+    tiles.push({kind:'shape', shape, color, selected:false});
+  }
 
   return {
     tiles: shuffle(tiles),
-    promptHTML: `Find the <span class="c">${targetShape.name}</span>`,
-    speech: `Find the ${targetShape.name}`,
+    groups,
+    totalNeed: groups.reduce((a,g)=>a+g.need, 0),
+    basket: cfg.basket,
+    jitter: cfg.jitter,
+    promptHTML: `Find ${joinParts(partsHTML)}`,
+    speech: `Find ${joinParts(partsSpeech)}`,
     label: 'Listen and look',
     tricky: false
   };
 }
 
 function makeColorQuestion(){
-  const d = G.difficulty;
-  const n = Math.min(COLORS.length, choicesFor(d));
-  const targetColor = pick(COLORS);
-  const targetShape = pick(SHAPES);
-  const otherColors = shuffle(COLORS.filter(c => c.id !== targetColor.id)).slice(0, n-1);
-  const sameChance = d < 0.34 ? 0 : d < 0.67 ? 0.5 : 0.9;
+  const cfg = levelCfg();
+  const groupColors = shuffle(COLORS).slice(0, cfg.groups);
+  const counts = cfg.groups === 1 ? [cfg.count] : [cfg.count, 1];
+  const groups = [], tiles = [], partsHTML = [], partsSpeech = [];
+  const usedColorIds = new Set();
 
-  const tiles = [{kind:'shape', shape:targetShape, color:targetColor, correct:true}];
-  otherColors.forEach(c => {
-    const shape = Math.random() < sameChance ? targetShape : pick(SHAPES);
-    tiles.push({kind:'shape', shape, color:c});
+  groupColors.forEach((color, i) => {
+    const need = counts[i];
+    groups.push({
+      need, found: 0,
+      match: t => t.kind === 'shape' && t.color.id === color.id,
+      preview: `<span class="slot-preview">${shapeSVG('circle', color)}</span>`
+    });
+    for(let k=0;k<need;k++) tiles.push({kind:'shape', shape:pick(SHAPES), color, selected:false});
+    usedColorIds.add(color.id);
+
+    const word = `<span class="c" style="color:${color.hex}">${color.name}</span>`;
+    if(cfg.groups > 1){
+      const noun = need === 1 ? 'thing' : 'things';
+      partsHTML.push(`${need} ${word} ${noun}`);
+      partsSpeech.push(`${need} ${color.name} ${noun}`);
+    } else if(need === 1){
+      partsHTML.push(`something ${word}`);
+      partsSpeech.push(`something ${color.name}`);
+    } else {
+      partsHTML.push(`${need} ${word} things`);
+      partsSpeech.push(`${need} ${color.name} things`);
+    }
   });
+
+  const matchShapes = tiles.map(t => t.shape);
+  const colorPool = COLORS.filter(c => !usedColorIds.has(c.id));
+  let guard = 0;
+  while(tiles.length < cfg.tiles && guard++ < 400){
+    const shape = Math.random() < cfg.sim ? pick(matchShapes) : pick(SHAPES);
+    tiles.push({kind:'shape', shape, color:pick(colorPool), selected:false});
+  }
 
   return {
     tiles: shuffle(tiles),
-    promptHTML: `Find something <span class="c" style="color:${targetColor.hex}">${targetColor.name}</span>`,
-    speech: `Find something ${targetColor.name}`,
+    groups,
+    totalNeed: groups.reduce((a,g)=>a+g.need, 0),
+    basket: cfg.basket,
+    jitter: cfg.jitter,
+    promptHTML: `Find ${joinParts(partsHTML)}`,
+    speech: `Find ${joinParts(partsSpeech)}`,
     label: 'Color hunt',
     tricky: false
   };
 }
 
 function makeBothQuestion(forceStroop=false){
-  const d = G.difficulty;
-  const n = choicesFor(d);
-  const ts = pick(SHAPES);
-  const tc = pick(COLORS);
-  const used = new Set([comboKey(ts, tc)]);
-  const sameChance = d < 0.34 ? 0.15 : d < 0.67 ? 0.55 : 0.95;
+  const cfg = levelCfg();
+  const stroop = forceStroop || getLevel() >= 5;
+  const shapePicks = shuffle(SHAPES).slice(0, cfg.groups);
+  const colorPicks = shuffle(COLORS).slice(0, cfg.groups);
+  const counts = cfg.groups === 1 ? [cfg.count] : [cfg.count, 1];
+  const spec = [];
+  for(let i=0;i<cfg.groups;i++) spec.push({shape:shapePicks[i], color:colorPicks[i]});
 
-  const tiles = [{kind:'shape', shape:ts, color:tc, correct:true}];
-  let guard = 0;
-  while(tiles.length < n && guard++ < 600){
-    let s, c;
-    const r = Math.random();
-    if(r < sameChance * 0.55){
-      s = ts;
-      c = pick(COLORS.filter(x => x.id !== tc.id));
-    } else if(r < sameChance){
-      c = tc;
-      s = pick(SHAPES.filter(x => x.id !== ts.id));
+  const groups = [], tiles = [], partsHTML = [], partsSpeech = [];
+
+  spec.forEach((s, i) => {
+    const need = counts[i];
+    groups.push({
+      need, found: 0,
+      match: t => t.kind === 'shape' && t.shape.id === s.shape.id && t.color.id === s.color.id,
+      preview: `<span class="slot-preview">${shapeSVG(s.shape.id, s.color)}</span>`
+    });
+    for(let k=0;k<need;k++) tiles.push({kind:'shape', shape:s.shape, color:s.color, selected:false});
+
+    const wordHex = stroop
+      ? pick(COLORS.filter(c => c.id !== s.color.id)).hex
+      : s.color.hex;
+    const word = `<span class="c" style="color:${wordHex}">${s.color.name}</span>`;
+    if(need === 1){
+      partsHTML.push(`the ${word} ${s.shape.name}`);
+      partsSpeech.push(`the ${s.color.name} ${s.shape.name}`);
     } else {
-      s = pick(SHAPES.filter(x => x.id !== ts.id));
-      c = pick(COLORS.filter(x => x.id !== tc.id));
+      partsHTML.push(`${need} ${word} ${s.shape.name}s`);
+      partsSpeech.push(`${need} ${s.color.name} ${s.shape.name}s`);
     }
-    if(!s || !c || used.has(comboKey(s,c))) continue;
-    used.add(comboKey(s,c));
-    tiles.push({kind:'shape', shape:s, color:c});
-  }
+  });
 
-  const stroop = forceStroop || d >= 0.62;
-  const wordHex = stroop ? pick(COLORS.filter(c => c.id !== tc.id)).hex : tc.hex;
+  const isTarget = (s,c) => spec.some(x => x.shape.id === s.id && x.color.id === c.id);
+  let guard = 0;
+  while(tiles.length < cfg.tiles && guard++ < 1200){
+    let shape, color;
+    const base = pick(spec);
+    const r = Math.random();
+    if(r < cfg.sim * 0.5){
+      shape = base.shape;
+      color = pick(COLORS.filter(c => c.id !== base.color.id));
+    } else if(r < cfg.sim){
+      color = base.color;
+      shape = pick(SHAPES.filter(s => s.id !== base.shape.id));
+    } else {
+      shape = pick(SHAPES);
+      color = pick(COLORS);
+    }
+    if(isTarget(shape, color)) continue;
+    tiles.push({kind:'shape', shape, color, selected:false});
+  }
 
   return {
     tiles: shuffle(tiles),
-    promptHTML: `Find the <span class="c" style="color:${wordHex}">${tc.name}</span> ${ts.name}`,
-    speech: `Find the ${tc.name} ${ts.name}`,
+    groups,
+    totalNeed: groups.reduce((a,g)=>a+g.need, 0),
+    basket: cfg.basket,
+    jitter: cfg.jitter,
+    promptHTML: `Find ${joinParts(partsHTML)}`,
+    speech: `Find ${joinParts(partsSpeech)}`,
     label: 'Shapes and colors',
     tricky: stroop,
     stroop
@@ -480,16 +606,21 @@ function makeBothQuestion(forceStroop=false){
 }
 
 function makeOddQuestion(){
-  const d = G.difficulty;
-  const n = choicesFor(d);
+  const cfg = levelCfg();
   const obj = pick(OBJECTS);
-  const shapeTiles = shuffle(SHAPES).slice(0, Math.min(SHAPES.length, n-1));
+  const tiles = [{kind:'object', obj, selected:false}];
 
-  const tiles = [{kind:'object', obj, correct:true}];
-  shapeTiles.forEach(s => tiles.push({kind:'shape', shape:s, color:pick(COLORS)}));
+  let guard = 0;
+  while(tiles.length < cfg.tiles && guard++ < 200){
+    tiles.push({kind:'shape', shape:pick(SHAPES), color:pick(COLORS), selected:false});
+  }
 
   return {
     tiles: shuffle(tiles),
+    groups: [{need:1, found:0, match:t => t.kind === 'object', preview:''}],
+    totalNeed: 1,
+    basket: false,
+    jitter: cfg.jitter,
     promptHTML: 'Find the picture that is <b>NOT</b> a shape!',
     speech: 'Find the picture that is not a shape!',
     label: 'Spot the odd one out',
@@ -498,17 +629,23 @@ function makeOddQuestion(){
 }
 
 function makeCategoryQuestion(){
-  const d = G.difficulty;
-  const n = choicesFor(d);
+  const cfg = levelCfg();
   const cat = pick(CATEGORIES);
   const target = pick(OBJECTS.filter(o => o.cat === cat));
-  const others = shuffle(OBJECTS.filter(o => o.cat !== cat)).slice(0, n-1);
+  const others = shuffle(OBJECTS.filter(o => o.cat !== cat));
+  const tiles = [{kind:'object', obj:target, selected:false}];
 
-  const tiles = [{kind:'object', obj:target, correct:true}];
-  others.forEach(o => tiles.push({kind:'object', obj:o}));
+  let i = 0;
+  while(tiles.length < cfg.tiles && i < others.length){
+    tiles.push({kind:'object', obj:others[i++], selected:false});
+  }
 
   return {
     tiles: shuffle(tiles),
+    groups: [{need:1, found:0, match:t => t.kind === 'object' && t.obj.cat === cat, preview:''}],
+    totalNeed: 1,
+    basket: false,
+    jitter: cfg.jitter,
     promptHTML: `Find the <span class="c">${cat}</span>`,
     speech: `Find the ${cat}`,
     label: 'Think about it',
@@ -551,7 +688,23 @@ function updateHUD(){
       `<span class="dot ${i<G.round.answered?'on':''}">${i<G.round.answered?'⭐':''}</span>`).join('');
     $('goalText').textContent = `${G.round.answered} / ${ROUND_LENGTH}`;
   }
-  updateDifficultyLabel();
+  updateLevelLabel();
+}
+
+function renderBasket(q){
+  const el = $('basket');
+  if(!q || !q.basket){
+    el.classList.add('hidden');
+    el.innerHTML = '';
+    return;
+  }
+  el.classList.remove('hidden');
+  el.innerHTML = q.groups.map(g => `
+    <div class="slot-group ${g.found >= g.need ? 'done' : ''}">
+      ${g.preview}
+      ${Array.from({length:g.need}, (_,i) =>
+        `<span class="slot ${i<g.found?'on':''}">${i<g.found?'⭐':''}</span>`).join('')}
+    </div>`).join('');
 }
 
 function renderQuiz(){
@@ -563,6 +716,8 @@ function renderQuiz(){
   grid.innerHTML = '';
   grid.style.setProperty('--cols', columnsFor(q.tiles.length));
   q.tiles.forEach(t => grid.appendChild(makeTile(t)));
+  renderBasket(q);
+  updateLevelLabel();
 }
 
 function makeTile(t){
@@ -575,6 +730,12 @@ function makeTile(t){
   } else {
     b.innerHTML = shapeSVG(t.shape.id, t.color);
     b.setAttribute('aria-label', `${t.color.name} ${t.shape.name}`);
+  }
+  if(G.quiz && G.quiz.jitter > 0){
+    const j = G.quiz.jitter;
+    b.style.setProperty('--jrot', ((Math.random()*2-1)*9*j).toFixed(1) + 'deg');
+    b.style.setProperty('--jx', ((Math.random()*2-1)*6*j).toFixed(1) + 'px');
+    b.style.setProperty('--jy', ((Math.random()*2-1)*6*j).toFixed(1) + 'px');
   }
   b.addEventListener('click', () => onQuizTap(b, t));
   return b;
@@ -614,7 +775,7 @@ function startGame(mode){
   G.screen = 'play';
   G.paused = false;
   G.stars = 0; G.score = 0; G.streak = 0; G.bestStreak = 0;
-  G.difficulty = 0.1; G.history = []; G.lastTricky = null;
+  G.levelFloat = 1; G.history = []; G.lastTricky = null;
   G.round = {num:1, answered:0, correct:0, stars:0};
   G.quiz = null; G.mem = null;
 
@@ -670,45 +831,71 @@ function nextQuestion(){
 
 function onQuizTap(btn, tile){
   if(G.screen !== 'play' || G.paused || G.locked) return;
+  if(tile.selected) return;
 
-  if(tile.correct){
-    G.locked = true;
-    btn.classList.add('correct');
+  const q = G.quiz;
+  const group = q.groups.find(g => g.found < g.need && g.match(tile));
+
+  if(group){
+    tile.selected = true;
+    btn.classList.add('picked');
     addPop(btn, '⭐');
+    group.found++;
+    renderBasket(q);
+    playCollect(group.found);
 
-    G.streak++;
-    G.bestStreak = Math.max(G.bestStreak, G.streak);
-    G.stars++; G.round.stars++; G.round.answered++;
-    if(!G.hadError) G.round.correct++;
-    G.score += 10 + Math.min(G.streak, 5) * 2;
-    recordResult(true);
-
-    $('feedback').textContent = pick(PRAISE);
-    playHappy();
-    confetti(10);
-    if(G.stars % 5 === 0) stickerReward();
-    updateHUD();
-
-    scheduleAdvance('next');
-
-  } else {
-    G.hadError = true;
-    G.streak = 0;
-    recordResult(false);
-
-    btn.classList.add('wrong');
-    setTimeout(() => btn.classList.remove('wrong'), 450);
-
-    $('feedback').textContent = pick(TRY);
-    playOops();
-    updateHUD();
-    setTimeout(() => {
-      if(G.screen === 'play' && !G.paused) speak(G.quiz.speech);
-    }, 320);
+    if(q.groups.every(g => g.found >= g.need)){
+      finishQuestion();
+    } else {
+      $('feedback').textContent = pick(GOT);
+    }
+    return;
   }
+
+  /* wrong tile — never punish, just guide */
+  G.hadError = true;
+  G.streak = 0;
+  recordResult(false);
+
+  btn.classList.add('wrong');
+  setTimeout(() => btn.classList.remove('wrong'), 450);
+
+  $('feedback').textContent = pick(TRY);
+  playOops();
+  updateHUD();
+  setTimeout(() => {
+    if(G.screen === 'play' && !G.paused) speak(q.speech);
+  }, 320);
+}
+
+function finishQuestion(){
+  const q = G.quiz;
+  G.locked = true;
+
+  const bonus = (q.totalNeed - 1) * 4;
+  G.streak++;
+  G.bestStreak = Math.max(G.bestStreak, G.streak);
+  G.stars++; G.round.stars++; G.round.answered++;
+  if(!G.hadError) G.round.correct++;
+  G.score += 10 + Math.min(G.streak, 5) * 2 + bonus;
+  recordResult(true);
+
+  $('feedback').textContent = pick(PRAISE);
+  playHappy();
+  confetti(10 + bonus);
+  if(G.stars % 5 === 0) stickerReward();
+  updateHUD();
+  scheduleAdvance('next');
 }
 
 let stickerTimer = null;
+function showLevelUp(lv){
+  $('reward').textContent = `⬆️ Level ${lv}!`;
+  playMatch();
+  confetti(20);
+  clearTimeout(stickerTimer);
+  stickerTimer = setTimeout(() => { $('reward').textContent = ''; }, 2600);
+}
 function stickerReward(){
   $('reward').textContent = `You earned a ${pick(REWARDS)} sticker!`;
   playMatch();
@@ -719,10 +906,10 @@ function stickerReward(){
 
 /* ---------------- memory mode ---------------- */
 function startMemoryRound(){
-  const pairs = 3 + Math.round(G.difficulty * 3);
+  const pairs = MEM_PAIRS[getLevel()-1];
   const combos = [];
   let guard = 0;
-  while(combos.length < pairs && guard++ < 600){
+  while(combos.length < pairs && guard++ < 800){
     const s = pick(SHAPES), c = pick(COLORS);
     if(!combos.some(x => x.shape.id === s.id && x.color.id === c.id)) combos.push({shape:s, color:c});
   }
@@ -740,6 +927,7 @@ function startMemoryRound(){
   $('promptLabel').textContent = 'Memory game';
   $('promptText').innerHTML = 'Match the pairs!';
   $('feedback').textContent = 'Find two that are the same';
+  renderBasket(null);
   renderMemory();
   updateHUD();
   speak('Find the matching pairs!');
@@ -860,9 +1048,9 @@ function showSummary(){
   $('summaryTitle').textContent = title;
   $('summaryEmoji').textContent = emoji;
   $('summaryMsg').textContent = msg;
-  $('summaryExtra').textContent = G.mode === 'memory'
-    ? `You matched ${G.round.answered} pairs in round ${G.round.num}.`
-    : `Round ${G.round.num} complete • ${G.round.answered} questions`;
+  $('summaryExtra').textContent = (G.mode === 'memory'
+    ? `You matched ${G.round.answered} pairs`
+    : `Round ${G.round.num} • ${G.round.answered} questions`) + ` • Level ${getLevel()} of 8`;
 
   $('summaryOverlay').classList.remove('hidden');
   confetti(30);
@@ -890,6 +1078,7 @@ function goHome(){
   $('summaryOverlay').classList.add('hidden');
   $('gameScreen').classList.add('hidden');
   $('startScreen').classList.remove('hidden');
+  renderBasket(null);
 }
 
 /* ============================================================
