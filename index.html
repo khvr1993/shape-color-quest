@@ -47,6 +47,17 @@
   .settings{display:flex;justify-content:center;gap:10px;margin-top:6px}
   .tiny{text-align:center;color:var(--muted);font-size:13px;font-weight:700;margin:2px 0 0}
 
+  /* start-level picker */
+  .level-picker{background:var(--card);border-radius:22px;padding:12px 12px 10px;box-shadow:var(--shadow)}
+  .lp-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;gap:8px}
+  .lp-head b{font-size:12.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+  .lp-head span{font-size:13px;font-weight:800;color:var(--accent2)}
+  .level-chips{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+  .chip{padding:9px 0;border-radius:14px;background:#F7F4FF;font-weight:900;font-size:15px;color:var(--ink);
+    box-shadow:0 3px 0 rgba(45,42,74,.07)}
+  .chip.active{background:linear-gradient(135deg,var(--accent),#FF9A5A);color:#fff;box-shadow:0 4px 0 #D94F7A}
+  .chip:active{transform:translateY(1px)}
+
   /* ---------- game screen ---------- */
   .topbar{display:flex;align-items:center;justify-content:space-between;gap:8px}
   .icon-btn{width:44px;height:44px;border-radius:50%;background:var(--card);font-size:19px;
@@ -156,6 +167,10 @@
       <h1>Shape <span>Color</span> Quest</h1>
       <p class="tagline">Listen, look, tap! A learning game for kids ages 3 to 6.</p>
     </div>
+    <div class="level-picker">
+      <div class="lp-head"><b>Start level</b><span id="startLevelInfo">Level 1 · easiest</span></div>
+      <div class="level-chips" id="levelChips"></div>
+    </div>
     <div class="mode-grid">
       <button class="mode-card" data-mode="shape">
         <span class="mode-emoji">🔺</span><span class="mode-name">Shapes</span>
@@ -185,7 +200,7 @@
       <button class="icon-btn" id="soundBtn" aria-label="Toggle sound">🔊</button>
       <button class="icon-btn" id="voiceBtn" aria-label="Toggle voice">🗣️</button>
     </div>
-    <p class="tiny">8 levels • counting games start at level 6</p>
+    <p class="tiny">15 levels • counting games start at level 8</p>
   </section>
 
   <!-- ================= GAME ================= -->
@@ -293,23 +308,33 @@ const GOT = ['Got it!','Nice!','Yes!','Good one!','Keep going!'];
 const TRY = ['Try again!','Almost! Look carefully!','You can do it!','Try another one!'];
 const REWARDS = ['🦁','🐶','🦄','🐸','🦋','🐙','🦉','🐢','🦊','🐼'];
 
-/* Level ladder: difficulty is a float 1..8 mapped to these rows. */
+const MAX_LEVEL = 15;
+const START_LEVEL_KEY = 'shapeColorQuest.startLevel';
+
+/* Level ladder: difficulty is a float 1..15 mapped to these rows. */
 const QUIZ_LEVELS = [
-  /* 1 */ {tiles:4,  groups:1, count:1, sim:0.00, jitter:0.00, basket:false},
-  /* 2 */ {tiles:5,  groups:1, count:1, sim:0.20, jitter:0.10, basket:false},
-  /* 3 */ {tiles:6,  groups:1, count:1, sim:0.50, jitter:0.15, basket:false},
-  /* 4 */ {tiles:7,  groups:1, count:1, sim:0.80, jitter:0.25, basket:false},
-  /* 5 */ {tiles:8,  groups:1, count:1, sim:0.95, jitter:0.35, basket:false},
-  /* 6 */ {tiles:8,  groups:1, count:2, sim:0.50, jitter:0.45, basket:true},
-  /* 7 */ {tiles:10, groups:2, count:2, sim:0.65, jitter:0.65, basket:true},
-  /* 8 */ {tiles:12, groups:2, count:2, sim:0.85, jitter:0.95, basket:true}
+  /*  1 */ {tiles:4,  groups:1, count:1, sim:0.00, jitter:0.00, basket:false},
+  /*  2 */ {tiles:5,  groups:1, count:1, sim:0.15, jitter:0.08, basket:false},
+  /*  3 */ {tiles:6,  groups:1, count:1, sim:0.35, jitter:0.12, basket:false},
+  /*  4 */ {tiles:7,  groups:1, count:1, sim:0.55, jitter:0.18, basket:false},
+  /*  5 */ {tiles:8,  groups:1, count:1, sim:0.75, jitter:0.24, basket:false},
+  /*  6 */ {tiles:8,  groups:1, count:1, sim:0.90, jitter:0.30, basket:false},
+  /*  7 */ {tiles:8,  groups:1, count:1, sim:0.95, jitter:0.36, basket:false},
+  /*  8 */ {tiles:8,  groups:1, count:2, sim:0.40, jitter:0.40, basket:true},
+  /*  9 */ {tiles:8,  groups:1, count:2, sim:0.60, jitter:0.45, basket:true},
+  /* 10 */ {tiles:10, groups:1, count:2, sim:0.80, jitter:0.55, basket:true},
+  /* 11 */ {tiles:10, groups:2, count:2, sim:0.50, jitter:0.60, basket:true},
+  /* 12 */ {tiles:10, groups:2, count:2, sim:0.70, jitter:0.70, basket:true},
+  /* 13 */ {tiles:12, groups:2, count:2, sim:0.80, jitter:0.80, basket:true},
+  /* 14 */ {tiles:12, groups:2, count:3, sim:0.85, jitter:0.90, basket:true},
+  /* 15 */ {tiles:12, groups:2, count:3, sim:0.95, jitter:1.00, basket:true}
 ];
-const MEM_PAIRS = [3,3,4,4,5,6,7,8];
+const MEM_PAIRS = [3,3,3,4,4,4,5,5,5,6,6,7,7,8,8];
 
 const G = {
   screen:'start', mode:null, paused:false,
   stars:0, score:0, streak:0, bestStreak:0,
-  levelFloat:1, history:[],
+  levelFloat:1, startLevel:1, history:[],
   round:{num:1, answered:0, correct:0, stars:0},
   quiz:null, mem:null, locked:false, hadError:false, lastTricky:null,
   pendingNext:false, pendingSummary:false, scheduleId:0,
@@ -320,12 +345,13 @@ const G = {
 const pick = a => a[Math.floor(Math.random()*a.length)];
 const shuffle = a => [...a].sort(()=>Math.random()-.5);
 const clamp = (v,lo,hi) => Math.min(hi,Math.max(lo,v));
-const getLevel = () => Math.max(1, Math.min(8, Math.floor(G.levelFloat)));
+const getLevel = () => Math.max(1, Math.min(MAX_LEVEL, Math.floor(G.levelFloat)));
 const levelCfg = (lv = getLevel()) => QUIZ_LEVELS[lv-1];
 
 function columnsFor(n){
   if(n <= 4) return 2;
   if(n <= 9) return 3;
+  if(n === 10) return window.innerWidth < 440 ? 4 : 5;
   return 4;
 }
 function memColumns(n){
@@ -411,25 +437,67 @@ function confetti(count=14){
 
 /* ============================================================
    LEVELS — adaptive from recent answers
-   levelFloat 1..8; ~3 correct answers per level up,
+   levelFloat 1..15; ~3 correct answers per level up,
    a couple of mistakes drops a level.
    ============================================================ */
 function recordResult(ok){
   G.history.push(ok?1:0);
   if(G.history.length > 8) G.history.shift();
   const before = getLevel();
-  G.levelFloat = clamp(G.levelFloat + (ok ? 0.40 : -0.55), 1, 8);
+  G.levelFloat = clamp(G.levelFloat + (ok ? 0.40 : -0.55), 1, MAX_LEVEL);
   const after = getLevel();
   if(after > before) showLevelUp(after);
   updateLevelLabel();
 }
 function updateLevelLabel(){
   const lv = getLevel();
-  const mood = lv <= 2 ? '🐣 Gentle' : lv <= 4 ? '🌱 Growing' : lv <= 6 ? '🚀 Tricky' : '🌟 Super tricky';
+  const mood = lv <= 3 ? '🐣 Gentle' : lv <= 7 ? '🌱 Growing' : lv <= 10 ? '🚀 Tricky' : '🌟 Super tricky';
   const el = $('diffLabel');
-  if(el) el.textContent = `Level ${lv} of 8 • ${mood}`;
+  if(el) el.textContent = `Level ${lv} of ${MAX_LEVEL} • ${mood}`;
   const app = $('app');
-  if(app) app.classList.toggle('compact', lv >= 6);
+  if(app) app.classList.toggle('compact', lv >= 10);
+}
+
+/* ---------------- start-level picker ---------------- */
+function levelBandName(lv){
+  if(lv <= 3) return 'easiest';
+  if(lv <= 7) return 'growing';
+  if(lv <= 10) return 'counting';
+  if(lv <= 12) return 'two groups';
+  return 'super tricky';
+}
+function loadStartLevel(){
+  try{
+    const raw = parseInt(localStorage.getItem(START_LEVEL_KEY), 10);
+    if(raw >= 1 && raw <= MAX_LEVEL) return raw;
+  }catch(e){}
+  return 1;
+}
+function saveStartLevel(v){
+  try{ localStorage.setItem(START_LEVEL_KEY, String(v)); }catch(e){}
+}
+function setStartLevel(lv){
+  G.startLevel = clamp(lv, 1, MAX_LEVEL);
+  saveStartLevel(G.startLevel);
+  renderLevelChips();
+  playFlip();
+}
+function renderLevelChips(){
+  const box = $('levelChips');
+  if(!box) return;
+  box.innerHTML = '';
+  for(let lv=1; lv<=MAX_LEVEL; lv++){
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip' + (lv === G.startLevel ? ' active' : '');
+    b.textContent = lv;
+    b.setAttribute('aria-label', `Start at level ${lv}, ${levelBandName(lv)}`);
+    b.setAttribute('aria-pressed', lv === G.startLevel ? 'true' : 'false');
+    b.addEventListener('click', () => setStartLevel(lv));
+    box.appendChild(b);
+  }
+  const info = $('startLevelInfo');
+  if(info) info.textContent = `Level ${G.startLevel} · ${levelBandName(G.startLevel)}`;
 }
 
 /* ============================================================
@@ -540,7 +608,7 @@ function makeColorQuestion(){
 
 function makeBothQuestion(forceStroop=false){
   const cfg = levelCfg();
-  const stroop = forceStroop || getLevel() >= 5;
+  const stroop = forceStroop || getLevel() >= 7;
   const shapePicks = shuffle(SHAPES).slice(0, cfg.groups);
   const colorPicks = shuffle(COLORS).slice(0, cfg.groups);
   const counts = cfg.groups === 1 ? [cfg.count] : [cfg.count, 1];
@@ -775,7 +843,7 @@ function startGame(mode){
   G.screen = 'play';
   G.paused = false;
   G.stars = 0; G.score = 0; G.streak = 0; G.bestStreak = 0;
-  G.levelFloat = 1; G.history = []; G.lastTricky = null;
+  G.levelFloat = G.startLevel; G.history = []; G.lastTricky = null;
   G.round = {num:1, answered:0, correct:0, stars:0};
   G.quiz = null; G.mem = null;
 
@@ -1050,7 +1118,7 @@ function showSummary(){
   $('summaryMsg').textContent = msg;
   $('summaryExtra').textContent = (G.mode === 'memory'
     ? `You matched ${G.round.answered} pairs`
-    : `Round ${G.round.num} • ${G.round.answered} questions`) + ` • Level ${getLevel()} of 8`;
+    : `Round ${G.round.num} • ${G.round.answered} questions`) + ` • Level ${getLevel()} of ${MAX_LEVEL}`;
 
   $('summaryOverlay').classList.remove('hidden');
   confetti(30);
@@ -1084,6 +1152,9 @@ function goHome(){
 /* ============================================================
    WIRING
    ============================================================ */
+G.startLevel = loadStartLevel();
+renderLevelChips();
+
 document.querySelectorAll('.mode-card').forEach(btn => {
   btn.addEventListener('click', () => {
     if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
