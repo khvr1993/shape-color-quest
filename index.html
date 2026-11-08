@@ -4,131 +4,303 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Shape Color Quest ⭐</title>
-<meta name="description" content="A fun, friendly game for 3-6 year olds to learn shapes and colors. Find the shape, tap it, earn stars!">
+<meta name="description" content="A friendly learning game for ages 3-6. Find shapes and colors by listening, match pairs, and beat the tricky word!"/>
+<meta name="theme-color" content="#FFF7D6">
 <style>
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  :root {
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  :root{
     --bg1:#FFF7D6; --bg2:#FFE3F1; --card:#fff; --ink:#2D2A4A; --muted:#7A7699;
-    --accent:#FF6B9D; --accent2:#6C5CE7; --sun:#FFC93C; --green:#2ED573; --radius:28px;
+    --accent:#FF6B9D; --accent2:#6C5CE7; --sun:#FFC93C; --green:#2ED573;
+    --shadow:0 6px 0 rgba(45,42,74,.08); --radius:26px;
   }
   html,body{height:100%}
   body{
-    margin:0; font-family: ui-rounded, "Comic Sans MS", "Segoe UI", system-ui, sans-serif;
-    color:var(--ink);
-    background: linear-gradient(160deg, var(--bg1) 0%, var(--bg2) 55%, #D6F0FF 100%);
-    min-height:100dvh; display:flex; justify-content:center; padding:14px 14px 28px;
+    margin:0; font-family:ui-rounded,"Comic Sans MS","Segoe UI",system-ui,sans-serif; color:var(--ink);
+    background:linear-gradient(160deg,var(--bg1) 0%,var(--bg2) 55%,#D6F0FF 100%);
+    min-height:100dvh; display:flex; justify-content:center; padding:14px 14px 26px;
   }
   body::before{
     content:"⭐  🔺  🟦  💛  🟣  ⭐"; position:fixed; inset:auto 0 -8px 0; text-align:center;
-    font-size:22px; opacity:.18; pointer-events:none; letter-spacing:14px;
+    font-size:22px; opacity:.16; pointer-events:none; letter-spacing:14px;
   }
-  .wrap{width:100%; max-width:560px; display:flex; flex-direction:column; gap:12px; position:relative; z-index:1}
-  header{display:flex; align-items:center; justify-content:space-between; gap:10px}
-  h1{font-size:clamp(24px,6vw,36px); margin:0; letter-spacing:.5px}
+  button{font-family:inherit;cursor:pointer;border:0;color:inherit}
+  .app{width:100%;max-width:620px;display:flex;flex-direction:column;position:relative;z-index:1}
+  .screen{display:flex;flex-direction:column;gap:12px;width:100%}
+  .hidden{display:none!important}
+
+  /* ---------- start screen ---------- */
+  .hero{text-align:center;padding:14px 8px 2px}
+  .hero-stars{font-size:26px;letter-spacing:8px;animation:bob 2.6s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(-6px)}}
+  h1{font-size:clamp(26px,7.5vw,42px);margin:6px 0;line-height:1.1;letter-spacing:.5px}
   h1 span{color:var(--accent)}
-  .pills{display:flex; gap:8px; flex-wrap:wrap}
-  .pill{background:var(--card); border-radius:999px; padding:8px 14px; font-weight:800; font-size:18px;
-    box-shadow:0 4px 0 rgba(45,42,74,.08); display:flex; align-items:center; gap:6px}
-  .toggles{display:flex; gap:8px}
-  button{font-family:inherit; cursor:pointer; border:0}
-  .icon-btn{width:48px;height:48px;border-radius:50%;background:var(--card);font-size:22px;
-    box-shadow:0 4px 0 rgba(45,42,74,.12); display:grid;place-items:center}
-  .icon-btn:active{transform:translateY(2px); box-shadow:0 2px 0 rgba(45,42,74,.12)}
-  .prompt-card{background:var(--card); border-radius:var(--radius); padding:18px 16px; text-align:center;
+  .tagline{margin:0;color:var(--muted);font-weight:800;font-size:15px}
+  .mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:6px}
+  .mode-card{background:var(--card);border-radius:24px;padding:16px 10px;display:flex;flex-direction:column;
+    align-items:center;gap:3px;box-shadow:var(--shadow);transition:transform .12s}
+  .mode-card:active{transform:scale(.97)}
+  .mode-card.wide{grid-column:1/-1;flex-direction:row;justify-content:center;gap:12px;padding:15px;text-align:left}
+  .mode-emoji{font-size:32px;line-height:1}
+  .mode-name{font-weight:900;font-size:18px}
+  .mode-desc{font-size:12.5px;color:var(--muted);font-weight:800;text-align:center;line-height:1.25}
+  .mode-card.wide .mode-desc{text-align:left}
+  .settings{display:flex;justify-content:center;gap:10px;margin-top:6px}
+  .tiny{text-align:center;color:var(--muted);font-size:13px;font-weight:700;margin:2px 0 0}
+
+  /* ---------- game screen ---------- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .icon-btn{width:44px;height:44px;border-radius:50%;background:var(--card);font-size:19px;
+    box-shadow:0 4px 0 rgba(45,42,74,.1);display:grid;place-items:center;flex:none}
+  .icon-btn:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(45,42,74,.1)}
+  .pills{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+  .pill{background:var(--card);border-radius:999px;padding:7px 12px;font-weight:900;font-size:15px;
+    box-shadow:0 3px 0 rgba(45,42,74,.07);display:flex;gap:5px;align-items:center}
+  .prompt-card{background:var(--card);border-radius:var(--radius);padding:16px 14px;text-align:center;
     box-shadow:0 8px 0 rgba(45,42,74,.07)}
-  .prompt-label{font-size:14px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); font-weight:800}
-  .prompt{font-size:clamp(28px,7vw,42px); font-weight:900; margin:6px 0 10px; line-height:1.15}
-  .prompt .c{ text-transform:capitalize; }
-  .speak{background:linear-gradient(135deg,var(--accent),#FF9A5A); color:#fff; border-radius:999px;
-    padding:12px 22px; font-size:19px; font-weight:900; box-shadow:0 5px 0 #D94F7A}
-  .speak:active{transform:translateY(3px); box-shadow:0 2px 0 #D94F7A}
-  .encourage{min-height:28px; font-size:20px; font-weight:800; color:var(--accent2); text-align:center}
-  .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
-  @media (max-width:380px){ .grid{grid-template-columns:repeat(2,1fr)} }
-  .tile{aspect-ratio:1; background:var(--card); border-radius:24px; display:grid; place-items:center;
-    box-shadow:0 6px 0 rgba(45,42,74,.08); transition:transform .12s, box-shadow .12s; position:relative; overflow:hidden}
+  .prompt-label{font-size:12.5px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:900}
+  .prompt{font-size:clamp(24px,6.6vw,36px);font-weight:900;margin:6px 0 10px;line-height:1.2}
+  .prompt .c{text-transform:capitalize}
+  .prompt b{color:var(--accent2)}
+  .tricky-note{font-size:12.5px;font-weight:800;color:var(--muted);margin-top:-4px}
+  .speak{background:linear-gradient(135deg,var(--accent),#FF9A5A);color:#fff;border-radius:999px;
+    padding:11px 20px;font-size:17px;font-weight:900;box-shadow:0 5px 0 #D94F7A}
+  .speak:active{transform:translateY(3px);box-shadow:0 2px 0 #D94F7A}
+  .feedback{min-height:26px;font-size:19px;font-weight:900;color:var(--accent2);text-align:center}
+
+  .grid{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);gap:10px;max-width:520px;margin:0 auto;width:100%}
+  .tile{aspect-ratio:1;background:var(--card);border-radius:22px;display:grid;place-items:center;
+    box-shadow:var(--shadow);transition:transform .12s,background .2s;position:relative;overflow:hidden;padding:6px}
   .tile:active{transform:scale(.96)}
-  .tile svg{width:68%; height:68%; filter:drop-shadow(0 3px 0 rgba(0,0,0,.08))}
-  .tile.correct{background:#D9FFE8; box-shadow:0 6px 0 #2ED573}
+  .tile svg{width:74%;height:74%;filter:drop-shadow(0 3px 0 rgba(0,0,0,.07))}
+  .tile .emoji{font-size:clamp(28px,8.5vw,50px);line-height:1}
+  .tile.correct{background:#D9FFE8;box-shadow:0 6px 0 var(--green)}
   .tile.wrong{animation:wiggle .4s}
   @keyframes wiggle{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
-  .pop{position:absolute; font-size:28px; animation:pop .6s forwards; pointer-events:none}
-  @keyframes pop{to{transform:translateY(-46px) scale(1.4); opacity:0}}
-  .progress{background:var(--card); border-radius:999px; padding:10px 14px; display:flex; align-items:center; gap:10px; font-weight:800}
-  .dots{flex:1; display:flex; gap:6px; justify-content:center}
-  .dot{width:22px;height:22px;border-radius:50%;background:#EEEAFB; display:grid;place-items:center; font-size:13px}
+  .pop{position:absolute;font-size:26px;animation:pop .7s forwards;pointer-events:none}
+  @keyframes pop{to{transform:translateY(-46px) scale(1.4);opacity:0}}
+
+  .tile.mem{background:linear-gradient(150deg,#8F7BFF,#6C5CE7);box-shadow:0 6px 0 #4B3FC4}
+  .tile.mem .card-back{font-size:clamp(24px,7vw,38px);opacity:.95}
+  .tile.mem.up,.tile.mem.done{background:#fff;box-shadow:var(--shadow)}
+  .tile.mem.done{background:#EFFBF2;box-shadow:0 6px 0 #B7E9C6}
+
+  .progress{background:var(--card);border-radius:999px;padding:9px 13px;display:flex;align-items:center;gap:8px;
+    font-weight:900;font-size:14px}
+  .dots{flex:1;display:flex;gap:5px;justify-content:center}
+  .dot{width:20px;height:20px;border-radius:50%;background:#EEEAFB;display:grid;place-items:center;font-size:11px}
   .dot.on{background:var(--sun)}
-  .reward{text-align:center; font-size:20px; font-weight:900; min-height:30px}
-  .footer{text-align:center; color:var(--muted); font-size:14px; font-weight:700}
-  .confetti{position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:10}
-  .confetti i{position:absolute; font-style:normal; animation:fall 1.6s ease-in forwards}
-  @keyframes fall{to{transform:translateY(105vh) rotate(360deg); opacity:0}}
-  .level{font-size:14px; color:var(--muted); font-weight:800; text-align:center}
+  .reward{text-align:center;font-size:18px;font-weight:900;min-height:24px;color:var(--accent2)}
+  .difficulty{text-align:center;color:var(--muted);font-size:12.5px;font-weight:800}
+  .footer{text-align:center;color:var(--muted);font-size:12px;font-weight:700}
+
+  /* ---------- overlays ---------- */
+  .overlay{position:fixed;inset:0;background:rgba(45,42,74,.55);display:grid;place-items:center;padding:20px;z-index:60}
+  .sheet{background:#fff;border-radius:32px;padding:26px 22px;max-width:430px;width:100%;text-align:center;
+    box-shadow:0 20px 40px rgba(0,0,0,.22);animation:rise .25s ease-out}
+  @keyframes rise{from{transform:translateY(16px) scale(.97);opacity:0}}
+  .sheet-emoji{font-size:52px;line-height:1}
+  .sheet h2{font-size:26px;margin:8px 0 4px}
+  .sheet p{margin:0;color:var(--muted);font-weight:800;font-size:15px}
+  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:16px 0 6px}
+  .stat{background:#F6F4FF;border-radius:18px;padding:11px 4px}
+  .stat b{display:block;font-size:22px}
+  .stat small{color:var(--muted);font-weight:900;font-size:11px;letter-spacing:.4px}
+  .btn{border-radius:999px;padding:14px 20px;font-size:17px;font-weight:900;width:100%;margin-top:10px;
+    box-shadow:0 4px 0 rgba(45,42,74,.1)}
+  .btn.primary{background:linear-gradient(135deg,var(--accent),#FF9A5A);color:#fff;box-shadow:0 5px 0 #D94F7A}
+  .btn.secondary{background:#EFEBFF;color:var(--accent2)}
+  .btn.ghost{background:#F4F2FA;color:var(--muted)}
+  .btn:active{transform:translateY(2px)}
+  .overlay-actions{display:flex;flex-direction:column;gap:0}
+
+  .confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:70}
+  .confetti i{position:absolute;font-style:normal;animation:fall 1.7s ease-in forwards}
+  @keyframes fall{to{transform:translateY(105vh) rotate(360deg);opacity:0}}
+  @media (max-width:430px){
+    .mode-desc{font-size:11.5px}
+    .pill{font-size:14px;padding:6px 10px}
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>Shape <span>Color</span> Quest ⭐</h1>
-    <div class="toggles">
-      <button class="icon-btn" id="soundBtn" aria-label="Sound on or off">🔊</button>
-      <button class="icon-btn" id="voiceBtn" aria-label="Voice on or off">🗣️</button>
+<div class="app">
+
+  <!-- ================= START ================= -->
+  <section id="startScreen" class="screen">
+    <div class="hero">
+      <div class="hero-stars" aria-hidden="true">⭐ 🔺 💛 🟣</div>
+      <h1>Shape <span>Color</span> Quest</h1>
+      <p class="tagline">Listen, look, tap! A learning game for kids ages 3 to 6.</p>
     </div>
-  </header>
+    <div class="mode-grid">
+      <button class="mode-card" data-mode="shape">
+        <span class="mode-emoji">🔺</span><span class="mode-name">Shapes</span>
+        <span class="mode-desc">Find the shape you hear</span>
+      </button>
+      <button class="mode-card" data-mode="color">
+        <span class="mode-emoji">🎨</span><span class="mode-name">Colors</span>
+        <span class="mode-desc">Find something that color</span>
+      </button>
+      <button class="mode-card" data-mode="both">
+        <span class="mode-emoji">✨</span><span class="mode-name">Shapes + Colors</span>
+        <span class="mode-desc">Find both together</span>
+      </button>
+      <button class="mode-card" data-mode="memory">
+        <span class="mode-emoji">🧠</span><span class="mode-name">Memory</span>
+        <span class="mode-desc">Match the pairs</span>
+      </button>
+      <button class="mode-card wide" data-mode="tricky">
+        <span class="mode-emoji">⚡</span>
+        <span>
+          <span class="mode-name">Tricky</span><br>
+          <span class="mode-desc">Sneaky color words, odd ones out &amp; more!</span>
+        </span>
+      </button>
+    </div>
+    <div class="settings">
+      <button class="icon-btn" id="soundBtn" aria-label="Toggle sound">🔊</button>
+      <button class="icon-btn" id="voiceBtn" aria-label="Toggle voice">🗣️</button>
+    </div>
+    <p class="tiny">Tap “Hear it!” at any time to listen again.</p>
+  </section>
 
-  <div class="pills">
-    <div class="pill">⭐ <span id="stars">0</span></div>
-    <div class="pill">🏆 <span id="score">0</span></div>
-    <div class="pill">🔥 <span id="streak">0</span></div>
-    <div class="pill" id="levelPill">⭐ Level 1</div>
-  </div>
+  <!-- ================= GAME ================= -->
+  <section id="gameScreen" class="screen hidden">
+    <div class="topbar">
+      <button class="icon-btn" id="pauseBtn" aria-label="Pause game">⏸️</button>
+      <div class="pills">
+        <span class="pill">⭐ <b id="stars">0</b></span>
+        <span class="pill">🏆 <b id="score">0</b></span>
+        <span class="pill">🔥 <b id="streak">0</b></span>
+      </div>
+      <button class="icon-btn" id="homeBtn" aria-label="Back to start">🏠</button>
+    </div>
 
-  <div class="prompt-card">
-    <div class="prompt-label">Can you find…</div>
-    <div class="prompt" id="promptText">Tap to start!</div>
-    <button class="speak" id="speakBtn">🔊 Hear it!</button>
-  </div>
+    <div class="prompt-card">
+      <div class="prompt-label" id="promptLabel">Can you find…</div>
+      <div class="prompt" id="promptText">Tap “Hear it!”</div>
+      <button class="speak" id="speakBtn">🔊 Hear it!</button>
+    </div>
 
-  <div class="encourage" id="encourage">Ready to play?</div>
+    <div class="feedback" id="feedback" aria-live="polite"></div>
+    <div class="grid" id="grid" aria-label="Choices"></div>
 
-  <div class="grid" id="grid" aria-label="Shapes to choose from"></div>
-
-  <div class="progress">
-    <span>🎁</span>
-    <div class="dots" id="dots"></div>
-    <span id="goalText">0 / 5</span>
-  </div>
-  <div class="reward" id="reward"></div>
-  <div class="level" id="levelText">Find the shape and tap it!</div>
-  <div class="footer">Made for little learners ages 3-6 • Tap Hear it! to listen again</div>
+    <div class="progress">
+      <span>🎁</span>
+      <div class="dots" id="dots"></div>
+      <span id="goalText">0 / 8</span>
+    </div>
+    <div class="reward" id="reward"></div>
+    <div class="difficulty" id="diffLabel">🐣 Gentle • adapting to your answers</div>
+    <div class="footer">For little learners ages 3–6</div>
+  </section>
 </div>
+
+<!-- ================= PAUSE ================= -->
+<div class="overlay hidden" id="pauseOverlay">
+  <div class="sheet">
+    <div class="sheet-emoji">⏸️</div>
+    <h2>Taking a break</h2>
+    <p>Everything is waiting for you!</p>
+    <div class="overlay-actions">
+      <button class="btn primary" id="resumeBtn">▶️ Keep playing</button>
+      <button class="btn secondary" id="restartBtn">🔄 Start this round again</button>
+      <button class="btn ghost" id="pauseHomeBtn">🏠 Choose a game</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SUMMARY ================= -->
+<div class="overlay hidden" id="summaryOverlay">
+  <div class="sheet">
+    <div class="sheet-emoji" id="summaryEmoji">🎉</div>
+    <h2 id="summaryTitle">Round complete!</h2>
+    <p id="summaryMsg">You did great!</p>
+    <div class="stats-grid">
+      <div class="stat"><b id="summaryStars">0</b><small>STARS</small></div>
+      <div class="stat"><b id="summaryAcc">0%</b><small>FIRST TRY</small></div>
+      <div class="stat"><b id="summaryStreak">0</b><small>BEST STREAK</small></div>
+    </div>
+    <p id="summaryExtra" class="tiny"></p>
+    <div class="overlay-actions">
+      <button class="btn primary" id="againBtn">▶️ Play another round</button>
+      <button class="btn secondary" id="summaryHomeBtn">🏠 Choose a game</button>
+    </div>
+  </div>
+</div>
+
 <div class="confetti" id="confetti"></div>
 
 <script>
+/* ============================================================
+   Shape Color Quest — single-file kids learning game
+   Modes: shapes, colors, shapes+colors, memory, tricky
+   Adaptive difficulty from recent answers (not round count)
+   ============================================================ */
+
+const $ = id => document.getElementById(id);
+const ROUND_LENGTH = 8;
+
 const SHAPES = [
-  {id:'circle', name:'circle'}, {id:'square', name:'square'}, {id:'triangle', name:'triangle'},
-  {id:'star', name:'star'}, {id:'heart', name:'heart'}, {id:'diamond', name:'diamond'},
-  {id:'rectangle', name:'rectangle'}, {id:'oval', name:'oval'}
+  {id:'circle',name:'circle'}, {id:'square',name:'square'}, {id:'triangle',name:'triangle'},
+  {id:'star',name:'star'}, {id:'heart',name:'heart'}, {id:'diamond',name:'diamond'},
+  {id:'rectangle',name:'rectangle'}, {id:'oval',name:'oval'}
 ];
 const COLORS = [
-  {id:'red', name:'red', hex:'#FF5252'}, {id:'blue', name:'blue', hex:'#3A86FF'},
-  {id:'green', name:'green', hex:'#2ED573'}, {id:'yellow', name:'yellow', hex:'#FFC93C'},
-  {id:'purple', name:'purple', hex:'#9B5DE5'}, {id:'orange', name:'orange', hex:'#FF9F1C'},
-  {id:'pink', name:'pink', hex:'#FF6B9D'}
+  {id:'red',name:'red',hex:'#FF5252'}, {id:'blue',name:'blue',hex:'#3A86FF'},
+  {id:'green',name:'green',hex:'#2ED573'}, {id:'yellow',name:'yellow',hex:'#FFC93C'},
+  {id:'purple',name:'purple',hex:'#9B5DE5'}, {id:'orange',name:'orange',hex:'#FF9F1C'},
+  {id:'pink',name:'pink',hex:'#FF6B9D'}
 ];
+const OBJECTS = [
+  {emoji:'🍎',name:'apple',cat:'fruit'}, {emoji:'🍌',name:'banana',cat:'fruit'},
+  {emoji:'🍓',name:'strawberry',cat:'fruit'}, {emoji:'🍇',name:'grapes',cat:'fruit'},
+  {emoji:'🐶',name:'dog',cat:'animal'}, {emoji:'🐱',name:'cat',cat:'animal'},
+  {emoji:'🐸',name:'frog',cat:'animal'}, {emoji:'🦋',name:'butterfly',cat:'animal'},
+  {emoji:'🚗',name:'car',cat:'vehicle'}, {emoji:'🚀',name:'rocket',cat:'vehicle'},
+  {emoji:'🚂',name:'train',cat:'vehicle'}, {emoji:'🚌',name:'bus',cat:'vehicle'},
+  {emoji:'🌸',name:'flower',cat:'plant'}, {emoji:'🌻',name:'sunflower',cat:'plant'},
+  {emoji:'🌵',name:'cactus',cat:'plant'}, {emoji:'🌳',name:'tree',cat:'plant'}
+];
+const CATEGORIES = ['fruit','animal','vehicle','plant'];
 const PRAISE = ['Great job!','Wow, super!','You did it!','Amazing!','Hooray!','Brilliant!','Well done!','Fantastic!'];
 const TRY = ['Try again!','Almost! Look carefully!','You can do it!','Try another one!'];
-const REWARDS = ['🦁','🐶','🦄','🐸','🦋','🐙','🦉','🐢'];
+const REWARDS = ['🦁','🐶','🦄','🐸','🦋','🐙','🦉','🐢','🦊','🐼'];
 
-let stars=0, score=0, streak=0, level=1, roundCount=0, soundOn=true, voiceOn=true, target=null, board=[];
-let audioCtx;
-const $ = id => document.getElementById(id);
-const grid=$('grid'), promptEl=$('promptText'), encourageEl=$('encourage');
+const G = {
+  screen:'start', mode:null, paused:false,
+  stars:0, score:0, streak:0, bestStreak:0,
+  difficulty:0.1, history:[],
+  round:{num:1, answered:0, correct:0, stars:0},
+  quiz:null, mem:null, locked:false, hadError:false, lastTricky:null,
+  pendingNext:false, pendingSummary:false, scheduleId:0,
+  soundOn:true, voiceOn:true
+};
 
-function tileCount(){ return level===1 ? 4 : level===2 ? 6 : 8; }
+/* ---------------- small helpers ---------------- */
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => [...a].sort(()=>Math.random()-.5);
+const clamp = (v,lo,hi) => Math.min(hi,Math.max(lo,v));
+const comboKey = (s,c) => s.id + '|' + c.id;
+const choicesFor = d => 4 + Math.round(d * 2) * 2;
+
+function columnsFor(n){
+  const narrow = window.innerWidth < 440;
+  if(n <= 4) return 2;
+  if(n <= 6) return 3;
+  return narrow ? 3 : 4;
+}
+function memColumns(n){
+  const narrow = window.innerWidth < 440;
+  if(n <= 6) return 3;
+  if(n <= 8) return 4;
+  return narrow ? 3 : 4;
+}
+
+/* ---------------- shapes ---------------- */
 function shapeSVG(shapeId, color){
-  const c=color.hex, id=shapeId;
-  const paths={
+  const c = color.hex;
+  const paths = {
     circle:`<circle cx="50" cy="50" r="38" fill="${c}"/>`,
     square:`<rect x="14" y="14" width="72" height="72" rx="12" fill="${c}"/>`,
     rectangle:`<rect x="8" y="26" width="84" height="48" rx="12" fill="${c}"/>`,
@@ -138,112 +310,630 @@ function shapeSVG(shapeId, color){
     diamond:`<path d="M50 8 L90 50 L50 92 L10 50 Z" fill="${c}" stroke-linejoin="round"/>`,
     oval:`<ellipse cx="50" cy="50" rx="42" ry="30" fill="${c}"/>`
   };
-  return `<svg viewBox="0 0 100 100" aria-hidden="true">${paths[id]||paths.circle}</svg>`;
+  return `<svg viewBox="0 0 100 100" aria-hidden="true">${paths[shapeId]||paths.circle}</svg>`;
 }
-function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
-function shuffle(a){ return [...a].sort(()=>Math.random()-.5); }
 
-function makeRound(){
-  roundCount++;
-  level = roundCount<=3 ? 1 : roundCount<=7 ? 2 : 3;
-  target = { shape: pick(SHAPES), color: pick(COLORS) };
-  const count = tileCount();
-  board = [{...target}];
-  // Distractors: half share the colour, half share the shape — teaches careful looking
-  while(board.length < count){
-    const useSameColor = board.length % 2 === 0;
-    let cand;
-    if(useSameColor){
-      const other = pick(SHAPES.filter(s=>s.id!==target.shape.id));
-      cand = { shape: other, color: target.color };
-    } else {
-      const other = pick(COLORS.filter(c=>c.id!==target.color.id));
-      cand = { shape: target.shape, color: other };
-    }
-    if(!board.some(b=>b.shape.id===cand.shape.id && b.color.id===cand.color.id)) board.push(cand);
+/* ---------------- sound & speech ---------------- */
+let audioCtx=null;
+function beep(freq, delay=0, dur=.14, type='sine', vol=.16){
+  if(!G.soundOn) return;
+  try{
+    audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume();
+    const t = audioCtx.currentTime + delay;
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = type; o.frequency.value = freq;
+    o.connect(g); g.connect(audioCtx.destination);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(.001, t+dur);
+    o.start(t); o.stop(t+dur);
+  }catch(e){}
+}
+const playHappy = () => [523,659,784,1047].forEach((f,i)=>beep(f, i*.09));
+const playOops  = () => { beep(300,0,.15,'triangle',.11); beep(250,.12,.18,'triangle',.11); };
+const playMatch = () => [659,880,1175].forEach((f,i)=>beep(f, i*.08,.12,'sine',.14));
+const playFlip  = () => beep(620+Math.random()*180, 0, .07, 'sine', .10);
+
+function speak(text){
+  if(!G.voiceOn || !('speechSynthesis' in window)) return;
+  if(G.paused) return;
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = .92; u.pitch = 1.15;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function speakCurrent(){
+  if(G.mode === 'memory') speak('Find the matching pairs!');
+  else if(G.quiz) speak(G.quiz.speech);
+}
+
+/* ---------------- confetti ---------------- */
+function confetti(count=14){
+  const box = $('confetti');
+  const em = ['⭐','🎉','💛','💜','💙','🧡','💚'];
+  for(let i=0;i<count;i++){
+    const s = document.createElement('i');
+    s.textContent = pick(em);
+    s.style.left = Math.random()*100 + 'vw';
+    s.style.top = '-40px';
+    s.style.fontSize = (16+Math.random()*22) + 'px';
+    s.style.animationDelay = (Math.random()*.3) + 's';
+    box.appendChild(s);
+    setTimeout(()=>s.remove(), 2100);
   }
-  board = shuffle(board);
-  renderPrompt();
-  renderGrid();
-  updateHUD();
-  speak(`Find the ${target.color.name} ${target.shape.name}!`);
 }
-function renderPrompt(){
-  promptEl.innerHTML = `Find the <span class="c" style="color:${target.color.hex}">${target.color.name}</span> ${target.shape.name}!`;
+
+/* ============================================================
+   ADAPTIVE DIFFICULTY
+   difficulty 0..1 drives choice count and distractor similarity.
+   Correct answers push it up, mistakes push it down.
+   ============================================================ */
+function recordResult(ok){
+  G.history.push(ok?1:0);
+  if(G.history.length > 8) G.history.shift();
+  const d = G.difficulty;
+  G.difficulty = clamp(ok ? d + 0.10*(1-d) : d - 0.13, 0.05, 1);
+  updateDifficultyLabel();
 }
-function renderGrid(){
-  grid.innerHTML='';
-  grid.style.gridTemplateColumns = tileCount()===4 ? 'repeat(2,1fr)' : 'repeat(3,1fr)';
-  board.forEach(item=>{
-    const b=document.createElement('button');
-    b.className='tile'; b.type='button';
-    b.setAttribute('aria-label', `${item.color.name} ${item.shape.name}`);
-    b.innerHTML = shapeSVG(item.shape.id, item.color);
-    b.onclick=()=>onTap(b,item);
+function updateDifficultyLabel(){
+  const d = G.difficulty;
+  const label = d < 0.34 ? '🐣 Gentle' : d < 0.67 ? '🌱 Growing' : '🚀 Tricky';
+  const el = $('diffLabel');
+  if(el) el.textContent = label + ' • adapting to your answers';
+}
+
+/* ============================================================
+   QUESTION BUILDERS
+   Each returns { tiles, promptHTML, speech, label, tricky, stroop }
+   Exactly one tile is the correct answer in every mode.
+   ============================================================ */
+
+function makeShapeQuestion(){
+  const d = G.difficulty;
+  const n = Math.min(SHAPES.length, choicesFor(d));
+  const targetShape = pick(SHAPES);
+  const targetColor = pick(COLORS);
+  const others = shuffle(SHAPES.filter(s => s.id !== targetShape.id)).slice(0, n-1);
+  const sameChance = d < 0.34 ? 0 : d < 0.67 ? 0.5 : 0.92;
+
+  const tiles = [{kind:'shape', shape:targetShape, color:targetColor, correct:true}];
+  others.forEach(s => {
+    const color = Math.random() < sameChance
+      ? targetColor
+      : pick(COLORS.filter(c => c.id !== targetColor.id));
+    tiles.push({kind:'shape', shape:s, color});
+  });
+
+  return {
+    tiles: shuffle(tiles),
+    promptHTML: `Find the <span class="c">${targetShape.name}</span>`,
+    speech: `Find the ${targetShape.name}`,
+    label: 'Listen and look',
+    tricky: false
+  };
+}
+
+function makeColorQuestion(){
+  const d = G.difficulty;
+  const n = Math.min(COLORS.length, choicesFor(d));
+  const targetColor = pick(COLORS);
+  const targetShape = pick(SHAPES);
+  const otherColors = shuffle(COLORS.filter(c => c.id !== targetColor.id)).slice(0, n-1);
+  const sameChance = d < 0.34 ? 0 : d < 0.67 ? 0.5 : 0.9;
+
+  const tiles = [{kind:'shape', shape:targetShape, color:targetColor, correct:true}];
+  otherColors.forEach(c => {
+    const shape = Math.random() < sameChance ? targetShape : pick(SHAPES);
+    tiles.push({kind:'shape', shape, color:c});
+  });
+
+  return {
+    tiles: shuffle(tiles),
+    promptHTML: `Find something <span class="c" style="color:${targetColor.hex}">${targetColor.name}</span>`,
+    speech: `Find something ${targetColor.name}`,
+    label: 'Color hunt',
+    tricky: false
+  };
+}
+
+function makeBothQuestion(forceStroop=false){
+  const d = G.difficulty;
+  const n = choicesFor(d);
+  const ts = pick(SHAPES);
+  const tc = pick(COLORS);
+  const used = new Set([comboKey(ts, tc)]);
+  const sameChance = d < 0.34 ? 0.15 : d < 0.67 ? 0.55 : 0.95;
+
+  const tiles = [{kind:'shape', shape:ts, color:tc, correct:true}];
+  let guard = 0;
+  while(tiles.length < n && guard++ < 600){
+    let s, c;
+    const r = Math.random();
+    if(r < sameChance * 0.55){
+      s = ts;
+      c = pick(COLORS.filter(x => x.id !== tc.id));
+    } else if(r < sameChance){
+      c = tc;
+      s = pick(SHAPES.filter(x => x.id !== ts.id));
+    } else {
+      s = pick(SHAPES.filter(x => x.id !== ts.id));
+      c = pick(COLORS.filter(x => x.id !== tc.id));
+    }
+    if(!s || !c || used.has(comboKey(s,c))) continue;
+    used.add(comboKey(s,c));
+    tiles.push({kind:'shape', shape:s, color:c});
+  }
+
+  const stroop = forceStroop || d >= 0.62;
+  const wordHex = stroop ? pick(COLORS.filter(c => c.id !== tc.id)).hex : tc.hex;
+
+  return {
+    tiles: shuffle(tiles),
+    promptHTML: `Find the <span class="c" style="color:${wordHex}">${tc.name}</span> ${ts.name}`,
+    speech: `Find the ${tc.name} ${ts.name}`,
+    label: 'Shapes and colors',
+    tricky: stroop,
+    stroop
+  };
+}
+
+function makeOddQuestion(){
+  const d = G.difficulty;
+  const n = choicesFor(d);
+  const obj = pick(OBJECTS);
+  const shapeTiles = shuffle(SHAPES).slice(0, Math.min(SHAPES.length, n-1));
+
+  const tiles = [{kind:'object', obj, correct:true}];
+  shapeTiles.forEach(s => tiles.push({kind:'shape', shape:s, color:pick(COLORS)}));
+
+  return {
+    tiles: shuffle(tiles),
+    promptHTML: 'Find the picture that is <b>NOT</b> a shape!',
+    speech: 'Find the picture that is not a shape!',
+    label: 'Spot the odd one out',
+    tricky: true
+  };
+}
+
+function makeCategoryQuestion(){
+  const d = G.difficulty;
+  const n = choicesFor(d);
+  const cat = pick(CATEGORIES);
+  const target = pick(OBJECTS.filter(o => o.cat === cat));
+  const others = shuffle(OBJECTS.filter(o => o.cat !== cat)).slice(0, n-1);
+
+  const tiles = [{kind:'object', obj:target, correct:true}];
+  others.forEach(o => tiles.push({kind:'object', obj:o}));
+
+  return {
+    tiles: shuffle(tiles),
+    promptHTML: `Find the <span class="c">${cat}</span>`,
+    speech: `Find the ${cat}`,
+    label: 'Think about it',
+    tricky: true
+  };
+}
+
+function makeTrickyQuestion(){
+  const options = ['stroop','odd','category'].filter(t => t !== G.lastTricky);
+  const type = pick(options.length ? options : ['stroop']);
+  G.lastTricky = type;
+  if(type === 'stroop') return makeBothQuestion(true);
+  if(type === 'odd') return makeOddQuestion();
+  return makeCategoryQuestion();
+}
+
+function makeQuestion(){
+  if(G.mode === 'shape') return makeShapeQuestion();
+  if(G.mode === 'color') return makeColorQuestion();
+  if(G.mode === 'both') return makeBothQuestion(false);
+  return makeTrickyQuestion();
+}
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+function updateHUD(){
+  $('stars').textContent = G.stars;
+  $('score').textContent = G.score;
+  $('streak').textContent = G.streak;
+
+  const dots = $('dots');
+  if(G.mode === 'memory' && G.mem){
+    const total = G.mem.pairs, done = G.mem.matched;
+    dots.innerHTML = Array.from({length:total}, (_,i) =>
+      `<span class="dot ${i<done?'on':''}">${i<done?'⭐':''}</span>`).join('');
+    $('goalText').textContent = `${done} / ${total} pairs`;
+  } else {
+    dots.innerHTML = Array.from({length:ROUND_LENGTH}, (_,i) =>
+      `<span class="dot ${i<G.round.answered?'on':''}">${i<G.round.answered?'⭐':''}</span>`).join('');
+    $('goalText').textContent = `${G.round.answered} / ${ROUND_LENGTH}`;
+  }
+  updateDifficultyLabel();
+}
+
+function renderQuiz(){
+  const q = G.quiz;
+  $('promptLabel').textContent = q.label;
+  $('promptText').innerHTML = q.promptHTML +
+    (q.stroop ? '<div class="tricky-note">👀 The color word may trick you!</div>' : '');
+  const grid = $('grid');
+  grid.innerHTML = '';
+  grid.style.setProperty('--cols', columnsFor(q.tiles.length));
+  q.tiles.forEach(t => grid.appendChild(makeTile(t)));
+}
+
+function makeTile(t){
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'tile';
+  if(t.kind === 'object'){
+    b.innerHTML = `<span class="emoji" aria-hidden="true">${t.obj.emoji}</span>`;
+    b.setAttribute('aria-label', t.obj.name);
+  } else {
+    b.innerHTML = shapeSVG(t.shape.id, t.color);
+    b.setAttribute('aria-label', `${t.color.name} ${t.shape.name}`);
+  }
+  b.addEventListener('click', () => onQuizTap(b, t));
+  return b;
+}
+
+function addPop(el, emoji){
+  const pop = document.createElement('span');
+  pop.className = 'pop';
+  pop.textContent = emoji;
+  el.appendChild(pop);
+}
+
+function renderMemory(){
+  const m = G.mem;
+  const grid = $('grid');
+  grid.innerHTML = '';
+  grid.style.setProperty('--cols', memColumns(m.cards.length));
+  m.cards.forEach((card, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    const open = card.up || card.done;
+    b.className = 'tile mem' + (card.done ? ' done' : card.up ? ' up' : '');
+    b.innerHTML = open
+      ? shapeSVG(card.shape.id, card.color)
+      : '<span class="card-back" aria-hidden="true">⭐</span>';
+    b.setAttribute('aria-label', open ? `${card.color.name} ${card.shape.name}` : 'Hidden card');
+    b.addEventListener('click', () => onMemoryTap(i));
     grid.appendChild(b);
   });
 }
-function onTap(el,item){
-  if(el.classList.contains('correct')) return;
-  if(item.shape.id===target.shape.id && item.color.id===target.color.id){
-    el.classList.add('correct');
-    const pop=document.createElement('span'); pop.className='pop'; pop.textContent='⭐'; el.appendChild(pop);
-    streak++; stars+=1; score+=10+Math.min(streak,5)*2;
-    encourageEl.textContent = pick(PRAISE);
-    playHappy(); confetti();
-    if(streak%5===0){ celebrate(); }
+
+/* ============================================================
+   GAME FLOW
+   ============================================================ */
+function startGame(mode){
+  G.mode = mode;
+  G.screen = 'play';
+  G.paused = false;
+  G.stars = 0; G.score = 0; G.streak = 0; G.bestStreak = 0;
+  G.difficulty = 0.1; G.history = []; G.lastTricky = null;
+  G.round = {num:1, answered:0, correct:0, stars:0};
+  G.quiz = null; G.mem = null;
+
+  $('startScreen').classList.add('hidden');
+  $('gameScreen').classList.remove('hidden');
+  $('summaryOverlay').classList.add('hidden');
+  $('pauseOverlay').classList.add('hidden');
+
+  startRound();
+}
+
+function scheduleAdvance(kind){
+  const id = G.scheduleId;
+  if(kind === 'next') G.pendingNext = true;
+  else G.pendingSummary = true;
+  setTimeout(() => {
+    if(id !== G.scheduleId || G.screen !== 'play') return;
+    if(kind === 'next' ? !G.pendingNext : !G.pendingSummary) return;
+    if(G.paused) return;
+    if(kind === 'next'){ G.pendingNext = false; nextQuestion(); }
+    else { G.pendingSummary = false; showSummary(); }
+  }, 900);
+}
+
+function startRound(){
+  G.locked = false;
+  G.hadError = false;
+  G.scheduleId++;
+  G.pendingNext = false;
+  G.pendingSummary = false;
+  G.round.answered = 0;
+  G.round.correct = 0;
+  G.round.stars = 0;
+  G.quiz = null;
+  $('feedback').textContent = '';
+  $('reward').textContent = '';
+
+  if(G.mode === 'memory') startMemoryRound();
+  else nextQuestion();
+
+  updateHUD();
+}
+
+function nextQuestion(){
+  if(G.round.answered >= ROUND_LENGTH){ showSummary(); return; }
+  G.locked = false;
+  G.hadError = false;
+  G.quiz = makeQuestion();
+  renderQuiz();
+  updateHUD();
+  speak(G.quiz.speech);
+}
+
+function onQuizTap(btn, tile){
+  if(G.screen !== 'play' || G.paused || G.locked) return;
+
+  if(tile.correct){
+    G.locked = true;
+    btn.classList.add('correct');
+    addPop(btn, '⭐');
+
+    G.streak++;
+    G.bestStreak = Math.max(G.bestStreak, G.streak);
+    G.stars++; G.round.stars++; G.round.answered++;
+    if(!G.hadError) G.round.correct++;
+    G.score += 10 + Math.min(G.streak, 5) * 2;
+    recordResult(true);
+
+    $('feedback').textContent = pick(PRAISE);
+    playHappy();
+    confetti(10);
+    if(G.stars % 5 === 0) stickerReward();
     updateHUD();
-    setTimeout(makeRound, 850);
+
+    scheduleAdvance('next');
+
   } else {
-    el.classList.add('wrong'); setTimeout(()=>el.classList.remove('wrong'),450);
-    streak=0; encourageEl.textContent = pick(TRY);
-    playOops(); updateHUD();
-    // Gentle hint: speak the target again
-    speak(`Find the ${target.color.name} ${target.shape.name}!`);
+    G.hadError = true;
+    G.streak = 0;
+    recordResult(false);
+
+    btn.classList.add('wrong');
+    setTimeout(() => btn.classList.remove('wrong'), 450);
+
+    $('feedback').textContent = pick(TRY);
+    playOops();
+    updateHUD();
+    setTimeout(() => {
+      if(G.screen === 'play' && !G.paused) speak(G.quiz.speech);
+    }, 320);
   }
 }
-function updateHUD(){
-  $('stars').textContent=stars; $('score').textContent=score; $('streak').textContent=streak;
-  $('levelPill').textContent=`⭐ Level ${level}`;
-  $('levelText').textContent = level===1 ? 'Level 1: 4 shapes — easy!' : level===2 ? 'Level 2: 6 shapes — tricky!' : 'Level 3: 8 shapes — superstar!';
-  const inGoal = stars % 5;
-  $('goalText').textContent = `${inGoal} / 5`;
-  $('dots').innerHTML = Array.from({length:5},(_,i)=>`<span class="dot ${i<inGoal?'on':''}">${i<inGoal?'⭐':''}</span>`).join('');
-  if(stars>0 && inGoal===0){ $('reward').textContent = `You earned a ${pick(REWARDS)} sticker! Keep going!`; }
+
+let stickerTimer = null;
+function stickerReward(){
+  $('reward').textContent = `You earned a ${pick(REWARDS)} sticker!`;
+  playMatch();
+  confetti(26);
+  clearTimeout(stickerTimer);
+  stickerTimer = setTimeout(() => { $('reward').textContent = ''; }, 2800);
 }
-function speak(text){
-  if(!voiceOn || !('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text); u.rate=.92; u.pitch=1.15; speechSynthesis.speak(u);
+
+/* ---------------- memory mode ---------------- */
+function startMemoryRound(){
+  const pairs = 3 + Math.round(G.difficulty * 3);
+  const combos = [];
+  let guard = 0;
+  while(combos.length < pairs && guard++ < 600){
+    const s = pick(SHAPES), c = pick(COLORS);
+    if(!combos.some(x => x.shape.id === s.id && x.color.id === c.id)) combos.push({shape:s, color:c});
+  }
+  const cards = shuffle(
+    combos.flatMap((x, i) => [
+      {pid:i, shape:x.shape, color:x.color, up:false, done:false},
+      {pid:i, shape:x.shape, color:x.color, up:false, done:false}
+    ])
+  );
+
+  G.mem = {cards, first:null, lock:false, matched:0, pairs};
+  G.locked = false;
+  G.hadError = false;
+
+  $('promptLabel').textContent = 'Memory game';
+  $('promptText').innerHTML = 'Match the pairs!';
+  $('feedback').textContent = 'Find two that are the same';
+  renderMemory();
+  updateHUD();
+  speak('Find the matching pairs!');
 }
-function beep(freq, t, dur=.14, type='sine', vol=.18){
-  if(!soundOn) return;
-  try{
-    audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
-    const o=audioCtx.createOscillator(), g=audioCtx.createGain();
-    o.type=type; o.frequency.value=freq; o.connect(g); g.connect(audioCtx.destination);
-    g.gain.setValueAtTime(vol, audioCtx.currentTime+t);
-    g.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime+t+dur);
-    o.start(audioCtx.currentTime+t); o.stop(audioCtx.currentTime+t+dur);
-  }catch(e){}
-}
-function playHappy(){ [523,659,784,1047].forEach((f,i)=>beep(f,i*.09)); }
-function playOops(){ beep(300,0,.15,'triangle',.12); beep(260,.12,.18,'triangle',.12); }
-function celebrate(){ [523,659,784,1047,1319].forEach((f,i)=>beep(f,i*.1,.2)); confetti(true); }
-function confetti(big=false){
-  const box=$('confetti'); const em=['⭐','🎉','💛','💜','💙','🧡'];
-  for(let i=0;i<(big?36:14);i++){
-    const s=document.createElement('i'); s.textContent=pick(em);
-    s.style.left=Math.random()*100+'vw'; s.style.top='-40px';
-    s.style.fontSize=(18+Math.random()*22)+'px'; s.style.animationDelay=(Math.random()*.3)+'s';
-    box.appendChild(s); setTimeout(()=>s.remove(),2000);
+
+function onMemoryTap(i){
+  if(G.screen !== 'play' || G.paused || !G.mem || G.mem.lock) return;
+  const m = G.mem;
+  const id = G.scheduleId;
+  const card = m.cards[i];
+  if(card.up || card.done) return;
+
+  card.up = true;
+  playFlip();
+
+  if(m.first === null){
+    m.first = i;
+    renderMemory();
+    return;
+  }
+
+  const first = m.cards[m.first];
+  renderMemory();
+
+  if(first.pid === card.pid){
+    m.lock = true;
+    setTimeout(() => {
+      if(id !== G.scheduleId || G.screen !== 'play') return;
+      first.done = true; card.done = true;
+      first.up = false; card.up = false;
+      m.first = null;
+      m.matched++;
+      m.lock = false;
+
+      G.stars++; G.round.stars++; G.round.answered++;
+      if(!G.hadError) G.round.correct++;
+      G.hadError = false;
+      G.streak++;
+      G.bestStreak = Math.max(G.bestStreak, G.streak);
+      G.score += 10 + Math.min(G.streak, 5) * 2;
+      recordResult(true);
+
+      $('feedback').textContent = pick(PRAISE);
+      playMatch();
+      confetti(10);
+      if(G.stars % 5 === 0) stickerReward();
+      updateHUD();
+      renderMemory();
+
+      if(m.matched === m.pairs){
+        G.locked = true;
+        scheduleAdvance('summary');
+      }
+    }, 450);
+  } else {
+    m.lock = true;
+    G.hadError = true;
+    G.streak = 0;
+    recordResult(false);
+    $('feedback').textContent = pick(TRY);
+    playOops();
+    updateHUD();
+
+    setTimeout(() => {
+      if(id !== G.scheduleId || G.screen !== 'play') return;
+      first.up = false; card.up = false;
+      m.first = null;
+      m.lock = false;
+      renderMemory();
+    }, 850);
   }
 }
-$('speakBtn').onclick=()=> target && speak(`Find the ${target.color.name} ${target.shape.name}!`);
-$('soundBtn').onclick=e=>{ soundOn=!soundOn; e.target.textContent=soundOn?'🔊':'🔇'; };
-$('voiceBtn').onclick=e=>{ voiceOn=!voiceOn; e.target.textContent=voiceOn?'🗣️':'🤫'; if(!voiceOn) speechSynthesis.cancel(); };
-grid.addEventListener('click', ()=>{ if(audioCtx && audioCtx.state==='suspended') audioCtx.resume(); }, {once:true});
-makeRound();
+
+/* ---------------- pause ---------------- */
+function pauseGame(){
+  if(G.screen !== 'play' || G.paused) return;
+  G.paused = true;
+  try{ speechSynthesis.cancel(); }catch(e){}
+  $('pauseOverlay').classList.remove('hidden');
+}
+function resumeGame(){
+  if(!G.paused) return;
+  G.paused = false;
+  $('pauseOverlay').classList.add('hidden');
+  if(G.pendingNext){ G.pendingNext = false; nextQuestion(); return; }
+  if(G.pendingSummary){ G.pendingSummary = false; showSummary(); return; }
+  if(G.mode === 'memory') speak('Find the matching pairs!');
+  else if(G.quiz) speak(G.quiz.speech);
+}
+function restartRound(){
+  G.paused = false;
+  G.screen = 'play';
+  $('pauseOverlay').classList.add('hidden');
+  $('summaryOverlay').classList.add('hidden');
+  startRound();
+}
+
+/* ---------------- summary ---------------- */
+function showSummary(){
+  G.screen = 'summary';
+  G.paused = false;
+  try{ speechSynthesis.cancel(); }catch(e){}
+
+  const total = Math.max(1, G.round.answered);
+  const acc = Math.round(100 * G.round.correct / total);
+
+  $('summaryStars').textContent = G.round.stars;
+  $('summaryAcc').textContent = acc + '%';
+  $('summaryStreak').textContent = G.bestStreak;
+
+  const title = acc >= 80 ? 'Superstar!' : acc >= 50 ? 'Great job!' : 'Nice trying!';
+  const emoji = acc >= 80 ? '🌟' : acc >= 50 ? '🎉' : '💪';
+  const msg = acc >= 80
+    ? 'You found almost everything first time!'
+    : acc >= 50
+      ? 'Look carefully and listen — you are getting better!'
+      : 'Every try helps your brain grow. Well done!';
+  $('summaryTitle').textContent = title;
+  $('summaryEmoji').textContent = emoji;
+  $('summaryMsg').textContent = msg;
+  $('summaryExtra').textContent = G.mode === 'memory'
+    ? `You matched ${G.round.answered} pairs in round ${G.round.num}.`
+    : `Round ${G.round.num} complete • ${G.round.answered} questions`;
+
+  $('summaryOverlay').classList.remove('hidden');
+  confetti(30);
+  playMatch();
+  speak(acc >= 50 ? 'Great job!' : 'Nice trying!');
+}
+
+function playAnotherRound(){
+  $('summaryOverlay').classList.add('hidden');
+  G.round.num++;
+  G.screen = 'play';
+  startRound();
+}
+
+function goHome(){
+  G.screen = 'start';
+  G.paused = false;
+  G.quiz = null;
+  G.mem = null;
+  G.scheduleId++;
+  G.pendingNext = false;
+  G.pendingSummary = false;
+  try{ speechSynthesis.cancel(); }catch(e){}
+  $('pauseOverlay').classList.add('hidden');
+  $('summaryOverlay').classList.add('hidden');
+  $('gameScreen').classList.add('hidden');
+  $('startScreen').classList.remove('hidden');
+}
+
+/* ============================================================
+   WIRING
+   ============================================================ */
+document.querySelectorAll('.mode-card').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    startGame(btn.dataset.mode);
+  });
+});
+
+$('speakBtn').addEventListener('click', speakCurrent);
+$('pauseBtn').addEventListener('click', pauseGame);
+$('homeBtn').addEventListener('click', goHome);
+$('resumeBtn').addEventListener('click', resumeGame);
+$('restartBtn').addEventListener('click', restartRound);
+$('pauseHomeBtn').addEventListener('click', goHome);
+$('againBtn').addEventListener('click', playAnotherRound);
+$('summaryHomeBtn').addEventListener('click', goHome);
+
+$('soundBtn').addEventListener('click', e => {
+  G.soundOn = !G.soundOn;
+  e.currentTarget.textContent = G.soundOn ? '🔊' : '🔇';
+  if(G.soundOn) playFlip();
+});
+$('voiceBtn').addEventListener('click', e => {
+  G.voiceOn = !G.voiceOn;
+  e.currentTarget.textContent = G.voiceOn ? '🗣️' : '🤫';
+  if(!G.voiceOn){ try{ speechSynthesis.cancel(); }catch(err){} }
+});
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){
+    if(G.paused) resumeGame();
+    else if(G.screen === 'play') pauseGame();
+  }
+});
+
+window.addEventListener('resize', () => {
+  if(G.screen !== 'play') return;
+  if(G.mode === 'memory' && G.mem) renderMemory();
+  else if(G.quiz) renderQuiz();
+});
 </script>
 </body>
 </html>
