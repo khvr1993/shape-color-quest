@@ -20,16 +20,16 @@ Pick a **start level** on the start screen (1–15); the choice is remembered on
 
 After that, difficulty adapts to **recent answers**: about three correct answers move the child up a level; a couple of mistakes move them back. Level-ups are announced with a toast, and the current level appears under the board and in the round summary.
 
+From level 5 the board gains **two more shapes every level** (8 at level 5, 28 at level 15), so each step visibly fills the screen with more to look at.
+
 | Levels | Board | Task |
 | --- | --- | --- |
-| 1–3 | 4–6 tiles | find one shape/color |
-| 4–6 | 7–8 tiles | distractors share the target's color or shape |
-| 7 | 8 tiles | tricky color words appear |
-| 8–9 | 8 tiles | **counting**: find 2 of something |
-| 10 | 10 tiles | counting with stronger distractors |
-| 11–12 | 10 tiles | **two groups**: find 2 of X and 1 of Y |
-| 13 | 12 tiles | two groups on a big jumbled board |
-| 14–15 | 12 tiles | **3 of X and 1 of Y**, strongest distractors |
+| 1–3 | 4–6 shapes | find one shape/color |
+| 4–5 | 7–8 shapes | distractors share the target's color or shape |
+| 6–7 | 10–12 shapes | bigger boards; tricky color words from level 7 |
+| 8–10 | 14–18 shapes | **counting**: find 2 of something |
+| 11–13 | 20–24 shapes | **two groups**: find 2 of X and 1 of Y |
+| 14–15 | 26–28 shapes | **3 of X and 1 of Y**, strongest distractors |
 
 Levels 8–15 add a **collection tray** under the prompt: each target has slots, and tapping a matching shape fills the next slot with a star. Tapped shapes stay on the board marked with a green ring. The task completes only when every slot is filled — so the child has to keep count.
 

@@ -295,12 +295,24 @@ const COLORS = [
 const OBJECTS = [
   {emoji:'🍎',name:'apple',cat:'fruit'}, {emoji:'🍌',name:'banana',cat:'fruit'},
   {emoji:'🍓',name:'strawberry',cat:'fruit'}, {emoji:'🍇',name:'grapes',cat:'fruit'},
+  {emoji:'🍉',name:'watermelon',cat:'fruit'}, {emoji:'🍊',name:'orange',cat:'fruit'},
+  {emoji:'🍍',name:'pineapple',cat:'fruit'}, {emoji:'🍒',name:'cherry',cat:'fruit'},
+  {emoji:'🍐',name:'pear',cat:'fruit'},
   {emoji:'🐶',name:'dog',cat:'animal'}, {emoji:'🐱',name:'cat',cat:'animal'},
   {emoji:'🐸',name:'frog',cat:'animal'}, {emoji:'🦋',name:'butterfly',cat:'animal'},
+  {emoji:'🐟',name:'fish',cat:'animal'}, {emoji:'🐰',name:'rabbit',cat:'animal'},
+  {emoji:'🦁',name:'lion',cat:'animal'}, {emoji:'🐵',name:'monkey',cat:'animal'},
+  {emoji:'🐧',name:'penguin',cat:'animal'},
   {emoji:'🚗',name:'car',cat:'vehicle'}, {emoji:'🚀',name:'rocket',cat:'vehicle'},
   {emoji:'🚂',name:'train',cat:'vehicle'}, {emoji:'🚌',name:'bus',cat:'vehicle'},
+  {emoji:'🚲',name:'bike',cat:'vehicle'}, {emoji:'⛵',name:'boat',cat:'vehicle'},
+  {emoji:'✈️',name:'plane',cat:'vehicle'}, {emoji:'🚚',name:'truck',cat:'vehicle'},
+  {emoji:'🚁',name:'helicopter',cat:'vehicle'},
   {emoji:'🌸',name:'flower',cat:'plant'}, {emoji:'🌻',name:'sunflower',cat:'plant'},
-  {emoji:'🌵',name:'cactus',cat:'plant'}, {emoji:'🌳',name:'tree',cat:'plant'}
+  {emoji:'🌵',name:'cactus',cat:'plant'}, {emoji:'🌳',name:'tree',cat:'plant'},
+  {emoji:'🌿',name:'leaf',cat:'plant'}, {emoji:'🍁',name:'maple leaf',cat:'plant'},
+  {emoji:'🌴',name:'palm tree',cat:'plant'}, {emoji:'🌹',name:'rose',cat:'plant'},
+  {emoji:'🌼',name:'blossom',cat:'plant'}
 ];
 const CATEGORIES = ['fruit','animal','vehicle','plant'];
 const PRAISE = ['Great job!','Wow, super!','You did it!','Amazing!','Hooray!','Brilliant!','Well done!','Fantastic!'];
@@ -318,16 +330,16 @@ const QUIZ_LEVELS = [
   /*  3 */ {tiles:6,  groups:1, count:1, sim:0.35, jitter:0.12, basket:false},
   /*  4 */ {tiles:7,  groups:1, count:1, sim:0.55, jitter:0.18, basket:false},
   /*  5 */ {tiles:8,  groups:1, count:1, sim:0.75, jitter:0.24, basket:false},
-  /*  6 */ {tiles:8,  groups:1, count:1, sim:0.90, jitter:0.30, basket:false},
-  /*  7 */ {tiles:8,  groups:1, count:1, sim:0.95, jitter:0.36, basket:false},
-  /*  8 */ {tiles:8,  groups:1, count:2, sim:0.40, jitter:0.40, basket:true},
-  /*  9 */ {tiles:8,  groups:1, count:2, sim:0.60, jitter:0.45, basket:true},
-  /* 10 */ {tiles:10, groups:1, count:2, sim:0.80, jitter:0.55, basket:true},
-  /* 11 */ {tiles:10, groups:2, count:2, sim:0.50, jitter:0.60, basket:true},
-  /* 12 */ {tiles:10, groups:2, count:2, sim:0.70, jitter:0.70, basket:true},
-  /* 13 */ {tiles:12, groups:2, count:2, sim:0.80, jitter:0.80, basket:true},
-  /* 14 */ {tiles:12, groups:2, count:3, sim:0.85, jitter:0.90, basket:true},
-  /* 15 */ {tiles:12, groups:2, count:3, sim:0.95, jitter:1.00, basket:true}
+  /*  6 */ {tiles:10, groups:1, count:1, sim:0.90, jitter:0.30, basket:false},
+  /*  7 */ {tiles:12, groups:1, count:1, sim:0.95, jitter:0.36, basket:false},
+  /*  8 */ {tiles:14, groups:1, count:2, sim:0.40, jitter:0.40, basket:true},
+  /*  9 */ {tiles:16, groups:1, count:2, sim:0.60, jitter:0.45, basket:true},
+  /* 10 */ {tiles:18, groups:1, count:2, sim:0.80, jitter:0.55, basket:true},
+  /* 11 */ {tiles:20, groups:2, count:2, sim:0.50, jitter:0.60, basket:true},
+  /* 12 */ {tiles:22, groups:2, count:2, sim:0.70, jitter:0.70, basket:true},
+  /* 13 */ {tiles:24, groups:2, count:2, sim:0.80, jitter:0.80, basket:true},
+  /* 14 */ {tiles:26, groups:2, count:3, sim:0.85, jitter:0.90, basket:true},
+  /* 15 */ {tiles:28, groups:2, count:3, sim:0.95, jitter:1.00, basket:true}
 ];
 const MEM_PAIRS = [3,3,3,4,4,4,5,5,5,6,6,7,7,8,8];
 
@@ -349,10 +361,12 @@ const getLevel = () => Math.max(1, Math.min(MAX_LEVEL, Math.floor(G.levelFloat))
 const levelCfg = (lv = getLevel()) => QUIZ_LEVELS[lv-1];
 
 function columnsFor(n){
+  const narrow = window.innerWidth < 440;
   if(n <= 4) return 2;
   if(n <= 9) return 3;
-  if(n === 10) return window.innerWidth < 440 ? 4 : 5;
-  return 4;
+  if(n <= 12) return 4;
+  if(n <= 20) return narrow ? 4 : 5;
+  return narrow ? 5 : 6;
 }
 function memColumns(n){
   const narrow = window.innerWidth < 440;
@@ -455,7 +469,7 @@ function updateLevelLabel(){
   const el = $('diffLabel');
   if(el) el.textContent = `Level ${lv} of ${MAX_LEVEL} • ${mood}`;
   const app = $('app');
-  if(app) app.classList.toggle('compact', lv >= 10);
+  if(app) app.classList.toggle('compact', lv >= 6);
 }
 
 /* ---------------- start-level picker ---------------- */
@@ -800,7 +814,7 @@ function makeTile(t){
     b.setAttribute('aria-label', `${t.color.name} ${t.shape.name}`);
   }
   if(G.quiz && G.quiz.jitter > 0){
-    const j = G.quiz.jitter;
+    const j = G.quiz.jitter * Math.min(1, 12 / G.quiz.tiles.length);
     b.style.setProperty('--jrot', ((Math.random()*2-1)*9*j).toFixed(1) + 'deg');
     b.style.setProperty('--jx', ((Math.random()*2-1)*6*j).toFixed(1) + 'px');
     b.style.setProperty('--jy', ((Math.random()*2-1)*6*j).toFixed(1) + 'px');
